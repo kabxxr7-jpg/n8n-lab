@@ -1,7 +1,8 @@
 name: ci
 
 # NOTE: this workflow has not been run yet (the repository has no remote at the time of writing).
-# Everything in it is exercised locally, but treat the file itself as untested until it has run.
+# Each step below was run by hand in a fresh clone on macOS with Node 26. Node 24, Linux and the
+# workflow file itself are untested until it has run once.
 
 on:
   push:
