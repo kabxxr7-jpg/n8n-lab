@@ -154,6 +154,13 @@ export async function startN8n({ dataDir = DATA_DIR, secrets, logFile, brokerPor
   let exited = null;
   child.on("exit", (code, sig) => (exited = { code, sig }));
   child.unref();
+  // last resort if the parent dies without running stop() (for example on Ctrl-C): take the group down
+  const onParentExit = () => {
+    try {
+      process.kill(-child.pid, "SIGKILL");
+    } catch {}
+  };
+  process.on("exit", onParentExit);
   const handle = {
     pid: child.pid,
     logFile,
@@ -163,6 +170,7 @@ export async function startN8n({ dataDir = DATA_DIR, secrets, logFile, brokerPor
         throw new Error("n8n exited but port 5690 is still busy");
       }
       await killTree(child.pid, { graceMs: 8000 });
+      process.off("exit", onParentExit);
       await waitPortFree(N8N_PORT, 10_000);
       await waitPortFree(brokerPort, 10_000);
     },

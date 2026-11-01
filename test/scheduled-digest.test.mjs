@@ -4,7 +4,7 @@
 // one test additionally lets the real scheduler fire a per-second copy.
 import { beforeAll, describe, expect, it } from "vitest";
 import { waitFor } from "../scripts/lib/proc.mjs";
-import { client, getExecution, lab, listExecutions, mock, nodeItems, ranNodes, saveEvidence, sleep, workflowId } from "./helpers/lab.mjs";
+import { client, getExecution, lab, listExecutions, mock, nodeItems, noteAsserted, ranNodes, saveEvidence, sleep, workflowId } from "./helpers/lab.mjs";
 
 const FILE = "scheduled-digest.json";
 const wf = () => workflowId(FILE);
@@ -204,6 +204,7 @@ describe("scheduled digest: the real scheduler", () => {
       );
       await c.api(`/workflows/${id}/deactivate`, { method: "POST", body: {} });
 
+      noteAsserted(execs);
       expect(execs.every((e) => e.mode === "trigger")).toBe(true); // fired by the scheduler, not by a person or the API
       const failed = execs.find((e) => e.status === "error");
       const good = execs.find((e) => e.status === "success");
