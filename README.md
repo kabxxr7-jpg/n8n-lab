@@ -2,7 +2,7 @@
 
 > **Status:** ran on 2026-11-01, macOS 27.2 (Darwin, arm64), n8n **2.45.7** (npm package, self-hosted, regular mode, SQLite) on Node **v26.13.0**.
 > 98 tests in 5 files pass against a real n8n instance, 46 to 49 recorded n8n executions are asserted on (the count varies with how often the real-scheduler test's copy fires), and the mutation check kills **49 of 49** mutants. A full test run takes about 55 seconds on a quiet machine, including starting the mocks and n8n and, on a first run, creating the n8n database (measured in a fresh clone: `npm ci` 51 s, `npm test` 55 s). The same suite took 21 minutes once while the machine was overloaded by other work, so timings here are for an idle machine. The mutation check takes about 36 minutes.
-> The CI file `.github/workflows/ci.yml` **has not run** (this repository has no remote yet). Each of its steps was run by hand in a fresh clone on macOS with Node 26 (the install variant `npm ci --ignore-scripts && npm rebuild sqlite3`, `check:workflows`, `npm test`, the quick self-test). **Node 24 (what the CI file pins), Linux and the workflow file itself are untested.**
+> GitHub Actions ran `.github/workflows/ci.yml` once on 2026-11-01 (Ubuntu, Node **24.22.1**, the first run after the repository went public): `npm ci --ignore-scripts`, `npm rebuild sqlite3`, `check:workflows`, all **98 tests in 5 files**, and the quick mutation self-test (5 of 5) passed, in about 3 minutes. CI does not run the 49-mutant check (it takes about 36 minutes); that was run locally on macOS with Node 26 only. One CI run is one data point, not a history.
 
 Honest proof for freelance workflow-automation jobs (n8n, and by extension the same patterns in Make or Zapier). The sibling kits test code. This one tests **workflows that run for real**: a real n8n server, real webhooks, real executions, with the outside world replaced by eight small local mock services. The tests fire HTTP requests at the workflow webhooks and then check three things: the HTTP answer, what n8n recorded for that execution (status, which nodes ran, what each node output), and what the mock services actually received.
 
@@ -23,7 +23,7 @@ Also: `test/local-only.test.mjs` (the n8n process tree only uses loopback and th
 
 ## Run it
 
-Needs Node 24 or newer (n8n 2.45.7 declares `>=24`) and about 4.5 GB of disk for n8n's dependency tree. macOS arm64 was used; nothing in the scripts is macOS-only except the screenshot step, which uses the locally installed Google Chrome.
+Needs Node 24 or newer (n8n 2.45.7 declares `>=24`) and about 4.5 GB of disk for n8n's dependency tree. The full local runs (and the 49-mutant check) used macOS arm64 with Node 26; CI used Ubuntu with Node 24. Nothing in the scripts is macOS-only except the screenshot step, which uses the locally installed Google Chrome.
 
 ```bash
 npm ci                    # installs n8n 2.45.7 into ./node_modules (git-ignored)
@@ -157,7 +157,7 @@ Those are the only changes to the mutants between the first and the recorded run
 - The `POST /rest/workflows/:id/run` route is internal to n8n and may change between versions. The public API is the stable surface.
 - Node v26 is newer than anything n8n 2.45.7 declares as tested (`>=24`); it worked here, which is all that is claimed.
 - The screenshots and network check are a sample of one run.
-- macOS only. Linux is untested; the CI file targets Ubuntu and has not run.
+- Linux was exercised once, by the CI run described at the top (tests and quick self-test only). The screenshots, the evidence run and the 49-mutant check were macOS only.
 
 ## Layout
 

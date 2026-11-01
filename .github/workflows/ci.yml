@@ -1,8 +1,7 @@
 name: ci
 
-# NOTE: this workflow has not been run yet (the repository has no remote at the time of writing).
-# Each step below was run by hand in a fresh clone on macOS with Node 26. Node 24, Linux and the
-# workflow file itself are untested until it has run once.
+# NOTE: first run 2026-11-01 on ubuntu-latest with Node 24: install, workflow check, 98 tests and the quick
+# self-test passed. The 49-mutant check (about 36 minutes) is not run here; it was run locally on macOS with Node 26.
 
 on:
   push:
