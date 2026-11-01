@@ -1,0 +1,387 @@
+{
+  "id": "623",
+  "workflowId": "1C6kj8uqeHEWtUPD",
+  "workflowName": "Retry, dedupe and error handling",
+  "nodesInWorkflow": [
+    {
+      "name": "Webhook: event",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "name": "Validate event",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Event valid?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond 400 invalid event",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Claim event id",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "First delivery?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond duplicate",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Call flaky API",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Mark claim done",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 200 processed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Release claim",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 502 failed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Fail execution",
+      "type": "n8n-nodes-base.stopAndError"
+    }
+  ],
+  "mode": "webhook",
+  "status": "success",
+  "finished": true,
+  "startedAt": "2026-11-01T04:06:32.994Z",
+  "stoppedAt": "2026-11-01T04:06:35.033Z",
+  "lastNodeExecuted": "Respond 200 processed",
+  "error": null,
+  "nodesRun": [
+    "Webhook: event",
+    "Validate event",
+    "Event valid?",
+    "Claim event id",
+    "First delivery?",
+    "Call flaky API",
+    "Mark claim done",
+    "Respond 200 processed"
+  ],
+  "runData": {
+    "Webhook: event": [
+      {
+        "startTime": 1793505992998,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 0,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "headers": {
+                    "host": "127.0.0.1:5690",
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "accept": "*/*",
+                    "accept-language": "*",
+                    "sec-fetch-mode": "cors",
+                    "user-agent": "node",
+                    "accept-encoding": "gzip, deflate",
+                    "content-length": "66"
+                  },
+                  "params": {},
+                  "query": {},
+                  "body": {
+                    "event_id": "r500mvxb5t0b1",
+                    "type": "order.created",
+                    "data": {
+                      "n": 1
+                    }
+                  },
+                  "webhookUrl": "http://127.0.0.1:5690/webhook/events",
+                  "executionMode": "production"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Validate event": [
+      {
+        "startTime": 1793505992998,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Webhook: event",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 4,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "event_id": "r500mvxb5t0b1",
+                  "type": "order.created",
+                  "data": {
+                    "n": 1
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Event valid?": [
+      {
+        "startTime": 1793505993002,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Validate event",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "event_id": "r500mvxb5t0b1",
+                  "type": "order.created",
+                  "data": {
+                    "n": 1
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Claim event id": [
+      {
+        "startTime": 1793505993004,
+        "executionIndex": 3,
+        "source": [
+          {
+            "previousNode": "Event valid?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 6,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "created_at": "2026-11-01T04:06:33.008Z",
+                    "id": "r500mvxb5t0b1",
+                    "type": "order.created",
+                    "status": "processing",
+                    "updated_at": "2026-11-01T04:06:33.008Z"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "147",
+                    "date": "Sun, 01 Nov 2026 04:06:33 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 201,
+                  "statusMessage": "Created"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "First delivery?": [
+      {
+        "startTime": 1793505993010,
+        "executionIndex": 4,
+        "source": [
+          {
+            "previousNode": "Claim event id",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "created_at": "2026-11-01T04:06:33.008Z",
+                    "id": "r500mvxb5t0b1",
+                    "type": "order.created",
+                    "status": "processing",
+                    "updated_at": "2026-11-01T04:06:33.008Z"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "147",
+                    "date": "Sun, 01 Nov 2026 04:06:33 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 201,
+                  "statusMessage": "Created"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Call flaky API": [
+      {
+        "startTime": 1793505993011,
+        "executionIndex": 5,
+        "source": [
+          {
+            "previousNode": "First delivery?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2018,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "ok": true,
+                  "event_id": "r500mvxb5t0b1",
+                  "attempt": 3,
+                  "result": "processed"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Mark claim done": [
+      {
+        "startTime": 1793505995030,
+        "executionIndex": 6,
+        "source": [
+          {
+            "previousNode": "Call flaky API",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "created_at": "2026-11-01T04:06:33.008Z",
+                  "id": "r500mvxb5t0b1",
+                  "type": "order.created",
+                  "status": "done",
+                  "updated_at": "2026-11-01T04:06:35.032Z"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Respond 200 processed": [
+      {
+        "startTime": 1793505995032,
+        "executionIndex": 7,
+        "source": [
+          {
+            "previousNode": "Mark claim done",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "created_at": "2026-11-01T04:06:33.008Z",
+                  "id": "r500mvxb5t0b1",
+                  "type": "order.created",
+                  "status": "done",
+                  "updated_at": "2026-11-01T04:06:35.032Z"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

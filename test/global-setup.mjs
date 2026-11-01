@@ -2,7 +2,10 @@
 // running stack described by LAB_CONTEXT_FILE, which is what the mutation check does).
 import fs from "node:fs";
 import path from "node:path";
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { startStack, SCRATCH, N8N_BASE } from "../scripts/lib/stack.mjs";
+import { killTree } from "../scripts/lib/proc.mjs";
 import { waitForLoad } from "../scripts/lib/load.mjs";
 
 export default async function setup(project) {
@@ -16,10 +19,7 @@ export default async function setup(project) {
   project.provide("lab", contextOf(stack));
   return async () => {
     summarizeAssertedExecutions();
-    if (process.env.LAB_SCREENSHOTS) {
-      const { takeScreenshots } = await import("../scripts/lib/screenshots.mjs");
-      await takeScreenshots(stack).catch((e) => console.error("screenshots failed:", e.message));
-    }
+    if (process.env.LAB_SCREENSHOTS) await runScreenshotProcess();
     await stack.stop();
   };
 }
@@ -47,4 +47,16 @@ function summarizeAssertedExecutions() {
     fs.writeFileSync(path.join(SCRATCH, "last-run-summary.json"), JSON.stringify(summary, null, 2));
     console.log(`n8n executions asserted on: ${unique.size} unique (${JSON.stringify(by)})`);
   } catch {}
+}
+
+// Playwright cannot run inside vitest's module runner, so the screenshots are a separate process.
+async function runScreenshotProcess({ timeoutMs = 240_000 } = {}) {
+  const script = fileURLToPath(new URL("../scripts/take-screenshots.mjs", import.meta.url));
+  const child = spawn(process.execPath, [script], { stdio: "inherit" });
+  const exited = new Promise((resolve) => child.on("exit", (code) => resolve(code)));
+  const timer = setTimeout(() => killTree(child.pid).catch(() => {}), timeoutMs);
+  const code = await exited;
+  clearTimeout(timer);
+  await killTree(child.pid).catch(() => {}); // anything the child left behind (Chrome)
+  if (code !== 0) console.error(`screenshots failed (exit ${code})`);
 }

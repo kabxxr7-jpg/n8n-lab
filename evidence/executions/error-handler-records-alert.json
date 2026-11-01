@@ -1,0 +1,195 @@
+{
+  "id": "626",
+  "workflowId": "c6r0VD2x7wPvt6UF",
+  "workflowName": "Error handler: record failure to alerts",
+  "nodesInWorkflow": [
+    {
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger"
+    },
+    {
+      "name": "Format alert",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Post alert",
+      "type": "n8n-nodes-base.httpRequest"
+    }
+  ],
+  "mode": "error",
+  "status": "success",
+  "finished": true,
+  "startedAt": "2026-11-01T04:06:42.232Z",
+  "stoppedAt": "2026-11-01T04:06:42.245Z",
+  "lastNodeExecuted": "Post alert",
+  "error": null,
+  "nodesRun": [
+    "Error Trigger",
+    "Format alert",
+    "Post alert"
+  ],
+  "runData": {
+    "Error Trigger": [
+      {
+        "startTime": 1793506002236,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 0,
+        "metadata": {
+          "parentExecution": {
+            "executionId": "625",
+            "workflowId": "1C6kj8uqeHEWtUPD",
+            "executionContext": {
+              "version": 1,
+              "establishedAt": 1793506000124,
+              "source": "webhook",
+              "triggerNode": {
+                "name": "Webhook: event",
+                "type": "n8n-nodes-base.webhook"
+              },
+              "redaction": {
+                "version": 2,
+                "production": false,
+                "manual": false
+              }
+            },
+            "shouldResume": false
+          }
+        },
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "execution": {
+                    "id": "625",
+                    "url": "http://127.0.0.1:5690/workflow/1C6kj8uqeHEWtUPD/executions/625",
+                    "error": {
+                      "level": "warning",
+                      "shouldReport": true,
+                      "tags": {},
+                      "timestamp": 1793506002209,
+                      "context": {},
+                      "functionality": "regular",
+                      "name": "NodeOperationError",
+                      "node": {
+                        "id": "7d5d042c-7d65-4421-af51-d9e7a5ef418b",
+                        "name": "Fail execution",
+                        "type": "n8n-nodes-base.stopAndError",
+                        "typeVersion": 1,
+                        "position": [
+                          2000,
+                          170
+                        ],
+                        "parameters": {
+                          "errorType": "errorMessage",
+                          "errorMessage": "=Event {{ $('Validate event').first().json.event_id }} failed after retries: {{ $('Call flaky API').first().json.error ? $('Call flaky API').first().json.error.message : 'upstream error' }}"
+                        }
+                      },
+                      "messages": [],
+                      "message": "Event permmvxb5yi43 failed after retries: 500 - \"{\\\"error\\\":\\\"scripted_failure\\\",\\\"attempt\\\":3}\"",
+                      "stack": "NodeOperationError: Event permmvxb5yi43 failed after retries: 500 - \"{\\\"error\\\":\\\"scripted_failure\\\",\\\"attempt\\\":3}\"\n    at ExecuteContext.execute (<repo>/node_modules/n8n-nodes-base/nodes/StopAndError/StopAndError.node.ts:91:9)\n    at WorkflowExecute.executeNode (<repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1154:31)\n    at WorkflowExecute.runNode (<repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1456:22)\n    at <repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2389:38\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at <repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2870:11"
+                    },
+                    "lastNodeExecuted": "Fail execution",
+                    "mode": "webhook",
+                    "executionContext": {
+                      "version": 1,
+                      "establishedAt": 1793506000124,
+                      "source": "webhook",
+                      "triggerNode": {
+                        "name": "Webhook: event",
+                        "type": "n8n-nodes-base.webhook"
+                      },
+                      "redaction": {
+                        "version": 2,
+                        "production": false,
+                        "manual": false
+                      }
+                    }
+                  },
+                  "workflow": {
+                    "id": "1C6kj8uqeHEWtUPD",
+                    "name": "Retry, dedupe and error handling"
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Format alert": [
+      {
+        "startTime": 1793506002236,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Error Trigger",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "severity": "error",
+                  "workflow": "Retry, dedupe and error handling",
+                  "workflow_id": "1C6kj8uqeHEWtUPD",
+                  "execution_id": "625",
+                  "failed_node": "Fail execution",
+                  "event_id": "permmvxb5yi43",
+                  "message": "Event permmvxb5yi43 failed after retries: 500 - \"{\\\"error\\\":\\\"scripted_failure\\\",\\\"attempt\\\":3}\"",
+                  "occurred_at": "2026-11-01T04:06:42.239Z"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Post alert": [
+      {
+        "startTime": 1793506002239,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Format alert",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 6,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "ok": true,
+                  "id": "alerts_1"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,258 @@
+{
+  "id": "650",
+  "workflowId": "Z1mdSsot2j10e8sw",
+  "workflowName": "Scheduled lead digest",
+  "nodesInWorkflow": [
+    {
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger"
+    },
+    {
+      "name": "Compute window",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Fetch leads (all pages)",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Build digest",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Anything to report?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Send digest",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Empty day: send nothing",
+      "type": "n8n-nodes-base.noOp"
+    }
+  ],
+  "mode": "manual",
+  "status": "success",
+  "finished": true,
+  "startedAt": "2026-11-01T04:06:55.607Z",
+  "stoppedAt": "2026-11-01T04:06:55.701Z",
+  "lastNodeExecuted": "Empty day: send nothing",
+  "error": null,
+  "nodesRun": [
+    "Schedule Trigger",
+    "Compute window",
+    "Fetch leads (all pages)",
+    "Build digest",
+    "Anything to report?",
+    "Empty day: send nothing"
+  ],
+  "runData": {
+    "Schedule Trigger": [
+      {
+        "startTime": 1793506015669,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 5,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "timestamp": "2026-11-01T09:36:55.672+05:30",
+                  "Readable date": "November 1st 2026, 9:36:55 am",
+                  "Readable time": "9:36:55 am",
+                  "Day of week": "Sunday",
+                  "Year": "2026",
+                  "Month": "November",
+                  "Day of month": "01",
+                  "Hour": "09",
+                  "Minute": "36",
+                  "Second": "55",
+                  "Timezone": "Asia/Kolkata (UTC+05:30)"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Compute window": [
+      {
+        "startTime": 1793506015674,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Schedule Trigger",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 4,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "since": "2026-10-31T04:06:55.677Z",
+                  "until": "2026-11-01T04:06:55.677Z",
+                  "window_hours": 24
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Fetch leads (all pages)": [
+      {
+        "startTime": 1793506015678,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Compute window",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 13,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "rows": [],
+                  "page": 1,
+                  "page_size": 50,
+                  "total": 0,
+                  "has_more": false
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Build digest": [
+      {
+        "startTime": 1793506015691,
+        "executionIndex": 3,
+        "source": [
+          {
+            "previousNode": "Fetch leads (all pages)",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 7,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "total": 0,
+                  "pending": 0,
+                  "by_status": {},
+                  "to": "leads-digest@n8n-lab.test",
+                  "subject": "Lead digest 2026-11-01: 0 new, 0 awaiting approval",
+                  "body": "Leads created in the last 24 hours: 0\nBy status: none\nAwaiting approval: 0\n\nTop by fit score:"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Anything to report?": [
+      {
+        "startTime": 1793506015698,
+        "executionIndex": 4,
+        "source": [
+          {
+            "previousNode": "Build digest",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [],
+            [
+              {
+                "json": {
+                  "total": 0,
+                  "pending": 0,
+                  "by_status": {},
+                  "to": "leads-digest@n8n-lab.test",
+                  "subject": "Lead digest 2026-11-01: 0 new, 0 awaiting approval",
+                  "body": "Leads created in the last 24 hours: 0\nBy status: none\nAwaiting approval: 0\n\nTop by fit score:"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Empty day: send nothing": [
+      {
+        "startTime": 1793506015701,
+        "executionIndex": 5,
+        "source": [
+          {
+            "previousNode": "Anything to report?",
+            "previousNodeOutput": 1,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 0,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "total": 0,
+                  "pending": 0,
+                  "by_status": {},
+                  "to": "leads-digest@n8n-lab.test",
+                  "subject": "Lead digest 2026-11-01: 0 new, 0 awaiting approval",
+                  "body": "Leads created in the last 24 hours: 0\nBy status: none\nAwaiting approval: 0\n\nTop by fit score:"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

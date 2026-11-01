@@ -1,0 +1,353 @@
+{
+  "id": "702",
+  "workflowId": "SfHtLmvsN33XhOrq",
+  "workflowName": "Lead approval gate (rules scorer)",
+  "nodesInWorkflow": [
+    {
+      "name": "Webhook: lead intake",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "name": "Validate lead",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Lead valid?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond 400 invalid lead",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Score lead (rules)",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Draft message",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Write lead (pending)",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 201 lead pending",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Respond 502 storage unavailable",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Webhook: approve",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "name": "Validate approval",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Approval valid?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond 400 invalid approval",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Get lead",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Lead found?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond lookup failed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Claim for sending",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Claim won?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond not claimed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Send email",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Mark sent",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 200 sent",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Mark send_failed",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 502 send failed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    }
+  ],
+  "mode": "webhook",
+  "status": "success",
+  "finished": true,
+  "startedAt": "2026-11-01T04:07:10.424Z",
+  "stoppedAt": "2026-11-01T04:07:10.438Z",
+  "lastNodeExecuted": "Respond lookup failed",
+  "error": null,
+  "nodesRun": [
+    "Webhook: approve",
+    "Validate approval",
+    "Approval valid?",
+    "Get lead",
+    "Lead found?",
+    "Respond lookup failed"
+  ],
+  "runData": {
+    "Webhook: approve": [
+      {
+        "startTime": 1793506030426,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 0,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "headers": {
+                    "host": "127.0.0.1:5690",
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "accept": "*/*",
+                    "accept-language": "*",
+                    "sec-fetch-mode": "cors",
+                    "user-agent": "node",
+                    "accept-encoding": "gzip, deflate",
+                    "content-length": "60"
+                  },
+                  "params": {},
+                  "query": {},
+                  "body": {
+                    "lead_id": "lead_987654",
+                    "approved_by": "approvermvxb6lw01c"
+                  },
+                  "webhookUrl": "http://127.0.0.1:5690/webhook/lead-approve",
+                  "executionMode": "production"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Validate approval": [
+      {
+        "startTime": 1793506030426,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Webhook: approve",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "lead_id": "lead_987654",
+                  "approved_by": "approvermvxb6lw01c"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Approval valid?": [
+      {
+        "startTime": 1793506030429,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Validate approval",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "lead_id": "lead_987654",
+                  "approved_by": "approvermvxb6lw01c"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Get lead": [
+      {
+        "startTime": 1793506030430,
+        "executionIndex": 3,
+        "source": [
+          {
+            "previousNode": "Approval valid?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "error": "not_found",
+                    "id": "lead_987654"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "40",
+                    "date": "Sun, 01 Nov 2026 04:07:10 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 404,
+                  "statusMessage": "Not Found"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Lead found?": [
+      {
+        "startTime": 1793506030432,
+        "executionIndex": 4,
+        "source": [
+          {
+            "previousNode": "Get lead",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [],
+            [
+              {
+                "json": {
+                  "body": {
+                    "error": "not_found",
+                    "id": "lead_987654"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "40",
+                    "date": "Sun, 01 Nov 2026 04:07:10 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 404,
+                  "statusMessage": "Not Found"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Respond lookup failed": [
+      {
+        "startTime": 1793506030433,
+        "executionIndex": 5,
+        "source": [
+          {
+            "previousNode": "Lead found?",
+            "previousNodeOutput": 1,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 5,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "error": "not_found",
+                    "id": "lead_987654"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "40",
+                    "date": "Sun, 01 Nov 2026 04:07:10 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 404,
+                  "statusMessage": "Not Found"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

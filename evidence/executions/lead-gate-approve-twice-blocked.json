@@ -1,0 +1,491 @@
+{
+  "id": "694",
+  "workflowId": "SfHtLmvsN33XhOrq",
+  "workflowName": "Lead approval gate (rules scorer)",
+  "nodesInWorkflow": [
+    {
+      "name": "Webhook: lead intake",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "name": "Validate lead",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Lead valid?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond 400 invalid lead",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Score lead (rules)",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Draft message",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Write lead (pending)",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 201 lead pending",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Respond 502 storage unavailable",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Webhook: approve",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "name": "Validate approval",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Approval valid?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond 400 invalid approval",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Get lead",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Lead found?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond lookup failed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Claim for sending",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Claim won?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond not claimed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Send email",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Mark sent",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 200 sent",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Mark send_failed",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 502 send failed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    }
+  ],
+  "mode": "webhook",
+  "status": "success",
+  "finished": true,
+  "startedAt": "2026-11-01T04:07:10.170Z",
+  "stoppedAt": "2026-11-01T04:07:10.188Z",
+  "lastNodeExecuted": "Respond not claimed",
+  "error": null,
+  "nodesRun": [
+    "Webhook: approve",
+    "Validate approval",
+    "Approval valid?",
+    "Get lead",
+    "Lead found?",
+    "Claim for sending",
+    "Claim won?",
+    "Respond not claimed"
+  ],
+  "runData": {
+    "Webhook: approve": [
+      {
+        "startTime": 1793506030173,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 0,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "headers": {
+                    "host": "127.0.0.1:5690",
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "accept": "*/*",
+                    "accept-language": "*",
+                    "sec-fetch-mode": "cors",
+                    "user-agent": "node",
+                    "accept-encoding": "gzip, deflate",
+                    "content-length": "56"
+                  },
+                  "params": {},
+                  "query": {},
+                  "body": {
+                    "lead_id": "lead_10",
+                    "approved_by": "approvermvxb6lp113"
+                  },
+                  "webhookUrl": "http://127.0.0.1:5690/webhook/lead-approve",
+                  "executionMode": "production"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Validate approval": [
+      {
+        "startTime": 1793506030173,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Webhook: approve",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "lead_id": "lead_10",
+                  "approved_by": "approvermvxb6lp113"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Approval valid?": [
+      {
+        "startTime": 1793506030175,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Validate approval",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "lead_id": "lead_10",
+                  "approved_by": "approvermvxb6lp113"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Get lead": [
+      {
+        "startTime": 1793506030177,
+        "executionIndex": 3,
+        "source": [
+          {
+            "previousNode": "Approval valid?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "created_at": "2026-11-01T04:07:10.108Z",
+                    "name": "Asha Rao",
+                    "email": "amvxb6lmy10@acme-logistics.test",
+                    "company": "Acme Logistics",
+                    "title": "Head of Operations",
+                    "employees": 120,
+                    "budget_usd": 8000,
+                    "message": "We need workflow automation between our CRM and billing API",
+                    "fit_score": 95,
+                    "tier": "high",
+                    "reasons": [
+                      "company size 11-200 (+25)",
+                      "senior title (+25)",
+                      "budget at least 5000 USD (+30)",
+                      "mentions automation, workflow, crm (+15)"
+                    ],
+                    "scored_by": "rules",
+                    "fallback_reason": null,
+                    "draft_subject": "Re: your enquiry from Acme Logistics",
+                    "draft_body": "Hi Asha,\n\nThanks for getting in touch (Head of Operations at Acme Logistics). I read your note and I think a short call is the quickest way to see whether I can help.\n\nWould a 20 minute call this week suit you?\n\nBest regards",
+                    "status": "sent",
+                    "id": "lead_10",
+                    "updated_at": "2026-11-01T04:07:10.163Z",
+                    "approved_by": "approvermvxb6lni12",
+                    "approved_at": "2026-11-01T04:07:10.157Z",
+                    "message_id": "msg_2",
+                    "sent_at": "2026-11-01T04:07:10.162Z"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "978",
+                    "date": "Sun, 01 Nov 2026 04:07:10 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 200,
+                  "statusMessage": "OK"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Lead found?": [
+      {
+        "startTime": 1793506030179,
+        "executionIndex": 4,
+        "source": [
+          {
+            "previousNode": "Get lead",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "created_at": "2026-11-01T04:07:10.108Z",
+                    "name": "Asha Rao",
+                    "email": "amvxb6lmy10@acme-logistics.test",
+                    "company": "Acme Logistics",
+                    "title": "Head of Operations",
+                    "employees": 120,
+                    "budget_usd": 8000,
+                    "message": "We need workflow automation between our CRM and billing API",
+                    "fit_score": 95,
+                    "tier": "high",
+                    "reasons": [
+                      "company size 11-200 (+25)",
+                      "senior title (+25)",
+                      "budget at least 5000 USD (+30)",
+                      "mentions automation, workflow, crm (+15)"
+                    ],
+                    "scored_by": "rules",
+                    "fallback_reason": null,
+                    "draft_subject": "Re: your enquiry from Acme Logistics",
+                    "draft_body": "Hi Asha,\n\nThanks for getting in touch (Head of Operations at Acme Logistics). I read your note and I think a short call is the quickest way to see whether I can help.\n\nWould a 20 minute call this week suit you?\n\nBest regards",
+                    "status": "sent",
+                    "id": "lead_10",
+                    "updated_at": "2026-11-01T04:07:10.163Z",
+                    "approved_by": "approvermvxb6lni12",
+                    "approved_at": "2026-11-01T04:07:10.157Z",
+                    "message_id": "msg_2",
+                    "sent_at": "2026-11-01T04:07:10.162Z"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "978",
+                    "date": "Sun, 01 Nov 2026 04:07:10 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 200,
+                  "statusMessage": "OK"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Claim for sending": [
+      {
+        "startTime": 1793506030180,
+        "executionIndex": 5,
+        "source": [
+          {
+            "previousNode": "Lead found?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "error": "precondition_failed",
+                    "id": "lead_10",
+                    "current_status": "sent"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "70",
+                    "date": "Sun, 01 Nov 2026 04:07:10 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 409,
+                  "statusMessage": "Conflict"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Claim won?": [
+      {
+        "startTime": 1793506030182,
+        "executionIndex": 6,
+        "source": [
+          {
+            "previousNode": "Claim for sending",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [],
+            [
+              {
+                "json": {
+                  "body": {
+                    "error": "precondition_failed",
+                    "id": "lead_10",
+                    "current_status": "sent"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "70",
+                    "date": "Sun, 01 Nov 2026 04:07:10 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 409,
+                  "statusMessage": "Conflict"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Respond not claimed": [
+      {
+        "startTime": 1793506030183,
+        "executionIndex": 7,
+        "source": [
+          {
+            "previousNode": "Claim won?",
+            "previousNodeOutput": 1,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 5,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "error": "precondition_failed",
+                    "id": "lead_10",
+                    "current_status": "sent"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "70",
+                    "date": "Sun, 01 Nov 2026 04:07:10 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 409,
+                  "statusMessage": "Conflict"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,289 @@
+{
+  "id": "656",
+  "workflowId": "Xf9M9GdZSMa2cY5i",
+  "workflowName": "Scheduled lead digest (per-second copy for the scheduler test)",
+  "nodesInWorkflow": [
+    {
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger"
+    },
+    {
+      "name": "Compute window",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Fetch leads (all pages)",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Build digest",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Anything to report?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Send digest",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Empty day: send nothing",
+      "type": "n8n-nodes-base.noOp"
+    }
+  ],
+  "mode": "trigger",
+  "status": "success",
+  "finished": true,
+  "startedAt": "2026-11-01T04:07:00.005Z",
+  "stoppedAt": "2026-11-01T04:07:00.029Z",
+  "lastNodeExecuted": "Send digest",
+  "error": null,
+  "nodesRun": [
+    "Schedule Trigger",
+    "Compute window",
+    "Fetch leads (all pages)",
+    "Build digest",
+    "Anything to report?",
+    "Send digest"
+  ],
+  "runData": {
+    "Schedule Trigger": [
+      {
+        "startTime": 1793506020009,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 0,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "timestamp": "2026-11-01T09:37:00.000+05:30",
+                  "Readable date": "November 1st 2026, 9:37:00 am",
+                  "Readable time": "9:37:00 am",
+                  "Day of week": "Sunday",
+                  "Year": "2026",
+                  "Month": "November",
+                  "Day of month": "01",
+                  "Hour": "09",
+                  "Minute": "37",
+                  "Second": "00",
+                  "Timezone": "Asia/Kolkata (UTC+05:30)"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Compute window": [
+      {
+        "startTime": 1793506020009,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Schedule Trigger",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 4,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "since": "2026-10-31T04:07:00.013Z",
+                  "until": "2026-11-01T04:07:00.013Z",
+                  "window_hours": 24
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Fetch leads (all pages)": [
+      {
+        "startTime": 1793506020013,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Compute window",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 7,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "rows": [
+                    {
+                      "created_at": "2026-11-01T04:06:57.996Z",
+                      "name": "Lead 0",
+                      "company": "Co 0",
+                      "status": "pending",
+                      "fit_score": 60,
+                      "tier": "medium",
+                      "id": "lead_1",
+                      "updated_at": "2026-11-01T04:06:57.996Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T04:06:57.996Z",
+                      "name": "Lead 1",
+                      "company": "Co 1",
+                      "status": "pending",
+                      "fit_score": 61,
+                      "tier": "medium",
+                      "id": "lead_2",
+                      "updated_at": "2026-11-01T04:06:57.996Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T04:06:57.996Z",
+                      "name": "Lead 2",
+                      "company": "Co 2",
+                      "status": "pending",
+                      "fit_score": 62,
+                      "tier": "medium",
+                      "id": "lead_3",
+                      "updated_at": "2026-11-01T04:06:57.996Z"
+                    }
+                  ],
+                  "page": 1,
+                  "page_size": 50,
+                  "total": 3,
+                  "has_more": false
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Build digest": [
+      {
+        "startTime": 1793506020020,
+        "executionIndex": 3,
+        "source": [
+          {
+            "previousNode": "Fetch leads (all pages)",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 5,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "total": 3,
+                  "pending": 3,
+                  "by_status": {
+                    "pending": 3
+                  },
+                  "to": "leads-digest@n8n-lab.test",
+                  "subject": "Lead digest 2026-11-01: 3 new, 3 awaiting approval",
+                  "body": "Leads created in the last 24 hours: 3\nBy status: pending 3\nAwaiting approval: 3\n\nTop by fit score:\n- lead_3 | Lead 2 (Co 2) | fit 62 medium | pending\n- lead_2 | Lead 1 (Co 1) | fit 61 medium | pending\n- lead_1 | Lead 0 (Co 0) | fit 60 medium | pending"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Anything to report?": [
+      {
+        "startTime": 1793506020025,
+        "executionIndex": 4,
+        "source": [
+          {
+            "previousNode": "Build digest",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "total": 3,
+                  "pending": 3,
+                  "by_status": {
+                    "pending": 3
+                  },
+                  "to": "leads-digest@n8n-lab.test",
+                  "subject": "Lead digest 2026-11-01: 3 new, 3 awaiting approval",
+                  "body": "Leads created in the last 24 hours: 3\nBy status: pending 3\nAwaiting approval: 3\n\nTop by fit score:\n- lead_3 | Lead 2 (Co 2) | fit 62 medium | pending\n- lead_2 | Lead 1 (Co 1) | fit 61 medium | pending\n- lead_1 | Lead 0 (Co 0) | fit 60 medium | pending"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Send digest": [
+      {
+        "startTime": 1793506020026,
+        "executionIndex": 5,
+        "source": [
+          {
+            "previousNode": "Anything to report?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "queued": true,
+                  "id": "mail_1"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

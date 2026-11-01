@@ -1,0 +1,477 @@
+{
+  "id": "625",
+  "workflowId": "1C6kj8uqeHEWtUPD",
+  "workflowName": "Retry, dedupe and error handling",
+  "nodesInWorkflow": [
+    {
+      "name": "Webhook: event",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "name": "Validate event",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Event valid?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond 400 invalid event",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Claim event id",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "First delivery?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond duplicate",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Call flaky API",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Mark claim done",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 200 processed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Release claim",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 502 failed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Fail execution",
+      "type": "n8n-nodes-base.stopAndError"
+    }
+  ],
+  "mode": "webhook",
+  "status": "error",
+  "finished": false,
+  "startedAt": "2026-11-01T04:06:40.135Z",
+  "stoppedAt": "2026-11-01T04:06:42.217Z",
+  "lastNodeExecuted": "Fail execution",
+  "error": {
+    "level": "warning",
+    "shouldReport": true,
+    "tags": {},
+    "timestamp": 1793506002209,
+    "context": {},
+    "functionality": "regular",
+    "name": "NodeOperationError",
+    "node": {
+      "id": "7d5d042c-7d65-4421-af51-d9e7a5ef418b",
+      "name": "Fail execution",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        170
+      ],
+      "parameters": {
+        "errorType": "errorMessage",
+        "errorMessage": "=Event {{ $('Validate event').first().json.event_id }} failed after retries: {{ $('Call flaky API').first().json.error ? $('Call flaky API').first().json.error.message : 'upstream error' }}"
+      }
+    },
+    "messages": [],
+    "message": "Event permmvxb5yi43 failed after retries: 500 - \"{\\\"error\\\":\\\"scripted_failure\\\",\\\"attempt\\\":3}\"",
+    "stack": "NodeOperationError: Event permmvxb5yi43 failed after retries: 500 - \"{\\\"error\\\":\\\"scripted_failure\\\",\\\"attempt\\\":3}\"\n    at ExecuteContext.execute (<repo>/node_modules/n8n-nodes-base/nodes/StopAndError/StopAndError.node.ts:91:9)\n    at WorkflowExecute.executeNode (<repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1154:31)\n    at WorkflowExecute.runNode (<repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1456:22)\n    at <repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2389:38\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at <repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2870:11"
+  },
+  "nodesRun": [
+    "Webhook: event",
+    "Validate event",
+    "Event valid?",
+    "Claim event id",
+    "First delivery?",
+    "Call flaky API",
+    "Release claim",
+    "Respond 502 failed",
+    "Fail execution"
+  ],
+  "runData": {
+    "Webhook: event": [
+      {
+        "startTime": 1793506000148,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 0,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "headers": {
+                    "host": "127.0.0.1:5690",
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "accept": "*/*",
+                    "accept-language": "*",
+                    "sec-fetch-mode": "cors",
+                    "user-agent": "node",
+                    "accept-encoding": "gzip, deflate",
+                    "content-length": "66"
+                  },
+                  "params": {},
+                  "query": {},
+                  "body": {
+                    "event_id": "permmvxb5yi43",
+                    "type": "order.created",
+                    "data": {
+                      "n": 1
+                    }
+                  },
+                  "webhookUrl": "http://127.0.0.1:5690/webhook/events",
+                  "executionMode": "production"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Validate event": [
+      {
+        "startTime": 1793506000148,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Webhook: event",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 33,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "event_id": "permmvxb5yi43",
+                  "type": "order.created",
+                  "data": {
+                    "n": 1
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Event valid?": [
+      {
+        "startTime": 1793506000181,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Validate event",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "event_id": "permmvxb5yi43",
+                  "type": "order.created",
+                  "data": {
+                    "n": 1
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Claim event id": [
+      {
+        "startTime": 1793506000184,
+        "executionIndex": 3,
+        "source": [
+          {
+            "previousNode": "Event valid?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "created_at": "2026-11-01T04:06:40.186Z",
+                    "id": "permmvxb5yi43",
+                    "type": "order.created",
+                    "status": "processing",
+                    "updated_at": "2026-11-01T04:06:40.186Z"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "147",
+                    "date": "Sun, 01 Nov 2026 04:06:40 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 201,
+                  "statusMessage": "Created"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "First delivery?": [
+      {
+        "startTime": 1793506000187,
+        "executionIndex": 4,
+        "source": [
+          {
+            "previousNode": "Claim event id",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "created_at": "2026-11-01T04:06:40.186Z",
+                    "id": "permmvxb5yi43",
+                    "type": "order.created",
+                    "status": "processing",
+                    "updated_at": "2026-11-01T04:06:40.186Z"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "147",
+                    "date": "Sun, 01 Nov 2026 04:06:40 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 201,
+                  "statusMessage": "Created"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Call flaky API": [
+      {
+        "startTime": 1793506000188,
+        "executionIndex": 5,
+        "source": [
+          {
+            "previousNode": "First delivery?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2009,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [],
+            [
+              {
+                "json": {
+                  "body": {
+                    "created_at": "2026-11-01T04:06:40.186Z",
+                    "id": "permmvxb5yi43",
+                    "type": "order.created",
+                    "status": "processing",
+                    "updated_at": "2026-11-01T04:06:40.186Z"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "147",
+                    "date": "Sun, 01 Nov 2026 04:06:40 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 201,
+                  "statusMessage": "Created",
+                  "error": {
+                    "message": "500 - \"{\\\"error\\\":\\\"scripted_failure\\\",\\\"attempt\\\":3}\"",
+                    "name": "AxiosError",
+                    "stack": "AxiosError: Request failed with status code 500\n    at settle (<repo>/node_modules/@n8n/backend-network/node_modules/axios/dist/node/axios.cjs:2530:12)\n    at RedirectableRequest.handleResponse (<repo>/node_modules/@n8n/backend-network/node_modules/axios/dist/node/axios.cjs:4731:9)\n    at RedirectableRequest.emit (node:events:526:24)\n    at RedirectableRequest._processResponse (<repo>/node_modules/follow-redirects/index.js:433:10)\n    at ClientRequest.RedirectableRequest._onNativeResponse (<repo>/node_modules/follow-redirects/index.js:109:12)\n    at ClientRequest.wrapper (node:events:639:12)\n    at ClientRequest.emit (node:events:514:20)\n    at HTTPParser.parserOnIncomingClient (node:_http_client:1002:27)\n    at HTTPParser.parserOnHeadersComplete (node:_http_common:125:17)\n    at Socket.socketOnData (node:_http_client:837:22)\n    at Axios.request (<repo>/node_modules/@n8n/backend-network/node_modules/axios/dist/node/axios.cjs:6308:43)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at requestWithResponseLimit (<repo>/node_modules/@n8n/backend-network/src/http/axios/invoke.ts:38:10)\n    at invokeAxios (<repo>/node_modules/@n8n/backend-network/src/http/axios/invoke.ts:16:10)\n    at executeLegacyRequest (<repo>/node_modules/@n8n/backend-network/src/http/legacy-request.ts:84:6)\n    at Object.requestLegacy (<repo>/node_modules/@n8n/backend-network/src/http/outbound-http.ts:228:13)\n    at proxyRequestToAxios (<repo>/node_modules/n8n-core/src/execution-engine/node-execution-context/utils/request-helpers/legacy-request-adapter.ts:28:9)\n    at Object.request (<repo>/node_modules/n8n-core/src/execution-engine/node-execution-context/utils/request-helpers/factory.ts:167:11)",
+                    "code": "ERR_BAD_RESPONSE",
+                    "status": 500
+                  },
+                  "details": {
+                    "message": "The service was not able to process your request",
+                    "description": "scripted_failure",
+                    "httpCode": "500",
+                    "body": {
+                      "error": "scripted_failure",
+                      "attempt": 3
+                    },
+                    "context": {
+                      "itemIndex": 0
+                    }
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Release claim": [
+      {
+        "startTime": 1793506002197,
+        "executionIndex": 6,
+        "source": [
+          {
+            "previousNode": "Call flaky API",
+            "previousNodeOutput": 1,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "deleted": "permmvxb5yi43"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Respond 502 failed": [
+      {
+        "startTime": 1793506002199,
+        "executionIndex": 7,
+        "source": [
+          {
+            "previousNode": "Release claim",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 4,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "deleted": "permmvxb5yi43"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Fail execution": [
+      {
+        "startTime": 1793506002203,
+        "executionIndex": 8,
+        "source": [
+          {
+            "previousNode": "Respond 502 failed",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 14,
+        "executionStatus": "error",
+        "error": {
+          "level": "warning",
+          "shouldReport": true,
+          "tags": {},
+          "timestamp": 1793506002209,
+          "context": {},
+          "functionality": "regular",
+          "name": "NodeOperationError",
+          "node": {
+            "id": "7d5d042c-7d65-4421-af51-d9e7a5ef418b",
+            "name": "Fail execution",
+            "type": "n8n-nodes-base.stopAndError",
+            "typeVersion": 1,
+            "position": [
+              2000,
+              170
+            ],
+            "parameters": {
+              "errorType": "errorMessage",
+              "errorMessage": "=Event {{ $('Validate event').first().json.event_id }} failed after retries: {{ $('Call flaky API').first().json.error ? $('Call flaky API').first().json.error.message : 'upstream error' }}"
+            }
+          },
+          "messages": [],
+          "message": "Event permmvxb5yi43 failed after retries: 500 - \"{\\\"error\\\":\\\"scripted_failure\\\",\\\"attempt\\\":3}\"",
+          "stack": "NodeOperationError: Event permmvxb5yi43 failed after retries: 500 - \"{\\\"error\\\":\\\"scripted_failure\\\",\\\"attempt\\\":3}\"\n    at ExecuteContext.execute (<repo>/node_modules/n8n-nodes-base/nodes/StopAndError/StopAndError.node.ts:91:9)\n    at WorkflowExecute.executeNode (<repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1154:31)\n    at WorkflowExecute.runNode (<repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1456:22)\n    at <repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2389:38\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at <repo>/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2870:11"
+        }
+      }
+    ]
+  }
+}

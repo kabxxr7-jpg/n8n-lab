@@ -1,0 +1,451 @@
+{
+  "id": "676",
+  "workflowId": "SfHtLmvsN33XhOrq",
+  "workflowName": "Lead approval gate (rules scorer)",
+  "nodesInWorkflow": [
+    {
+      "name": "Webhook: lead intake",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "name": "Validate lead",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Lead valid?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond 400 invalid lead",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Score lead (rules)",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Draft message",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Write lead (pending)",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 201 lead pending",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Respond 502 storage unavailable",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Webhook: approve",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "name": "Validate approval",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Approval valid?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond 400 invalid approval",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Get lead",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Lead found?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond lookup failed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Claim for sending",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Claim won?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond not claimed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Send email",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Mark sent",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 200 sent",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Mark send_failed",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 502 send failed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    }
+  ],
+  "mode": "webhook",
+  "status": "success",
+  "finished": true,
+  "startedAt": "2026-11-01T04:07:09.335Z",
+  "stoppedAt": "2026-11-01T04:07:09.365Z",
+  "lastNodeExecuted": "Respond 201 lead pending",
+  "error": null,
+  "nodesRun": [
+    "Webhook: lead intake",
+    "Validate lead",
+    "Lead valid?",
+    "Score lead (rules)",
+    "Draft message",
+    "Write lead (pending)",
+    "Respond 201 lead pending"
+  ],
+  "runData": {
+    "Webhook: lead intake": [
+      {
+        "startTime": 1793506029338,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 0,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "headers": {
+                    "host": "127.0.0.1:5690",
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "accept": "*/*",
+                    "accept-language": "*",
+                    "sec-fetch-mode": "cors",
+                    "user-agent": "node",
+                    "accept-encoding": "gzip, deflate",
+                    "content-length": "243"
+                  },
+                  "params": {},
+                  "query": {},
+                  "body": {
+                    "name": "Asha Rao",
+                    "company": "Acme Logistics",
+                    "title": "Head of Operations",
+                    "employees": 120,
+                    "budget_usd": 8000,
+                    "message": "We need workflow automation between our CRM and billing API",
+                    "email": "amvxb6l1l0@acme-logistics.test",
+                    "tag": "tagmvxb6l1l1"
+                  },
+                  "webhookUrl": "http://127.0.0.1:5690/webhook/lead-intake",
+                  "executionMode": "production"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Validate lead": [
+      {
+        "startTime": 1793506029338,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Webhook: lead intake",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 5,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "lead": {
+                    "name": "Asha Rao",
+                    "email": "amvxb6l1l0@acme-logistics.test",
+                    "company": "Acme Logistics",
+                    "title": "Head of Operations",
+                    "employees": 120,
+                    "budget_usd": 8000,
+                    "message": "We need workflow automation between our CRM and billing API"
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Lead valid?": [
+      {
+        "startTime": 1793506029343,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Validate lead",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "lead": {
+                    "name": "Asha Rao",
+                    "email": "amvxb6l1l0@acme-logistics.test",
+                    "company": "Acme Logistics",
+                    "title": "Head of Operations",
+                    "employees": 120,
+                    "budget_usd": 8000,
+                    "message": "We need workflow automation between our CRM and billing API"
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Score lead (rules)": [
+      {
+        "startTime": 1793506029345,
+        "executionIndex": 3,
+        "source": [
+          {
+            "previousNode": "Lead valid?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 5,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "lead": {
+                    "name": "Asha Rao",
+                    "email": "amvxb6l1l0@acme-logistics.test",
+                    "company": "Acme Logistics",
+                    "title": "Head of Operations",
+                    "employees": 120,
+                    "budget_usd": 8000,
+                    "message": "We need workflow automation between our CRM and billing API"
+                  },
+                  "fit_score": 95,
+                  "tier": "high",
+                  "reasons": [
+                    "company size 11-200 (+25)",
+                    "senior title (+25)",
+                    "budget at least 5000 USD (+30)",
+                    "mentions automation, workflow, crm (+15)"
+                  ],
+                  "scored_by": "rules"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Draft message": [
+      {
+        "startTime": 1793506029350,
+        "executionIndex": 4,
+        "source": [
+          {
+            "previousNode": "Score lead (rules)",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "lead": {
+                    "name": "Asha Rao",
+                    "email": "amvxb6l1l0@acme-logistics.test",
+                    "company": "Acme Logistics",
+                    "title": "Head of Operations",
+                    "employees": 120,
+                    "budget_usd": 8000,
+                    "message": "We need workflow automation between our CRM and billing API"
+                  },
+                  "fit_score": 95,
+                  "tier": "high",
+                  "reasons": [
+                    "company size 11-200 (+25)",
+                    "senior title (+25)",
+                    "budget at least 5000 USD (+30)",
+                    "mentions automation, workflow, crm (+15)"
+                  ],
+                  "scored_by": "rules",
+                  "draft_subject": "Re: your enquiry from Acme Logistics",
+                  "draft_body": "Hi Asha,\n\nThanks for getting in touch (Head of Operations at Acme Logistics). I read your note and I think a short call is the quickest way to see whether I can help.\n\nWould a 20 minute call this week suit you?\n\nBest regards"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Write lead (pending)": [
+      {
+        "startTime": 1793506029353,
+        "executionIndex": 5,
+        "source": [
+          {
+            "previousNode": "Draft message",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 7,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "created_at": "2026-11-01T04:07:09.360Z",
+                  "name": "Asha Rao",
+                  "email": "amvxb6l1l0@acme-logistics.test",
+                  "company": "Acme Logistics",
+                  "title": "Head of Operations",
+                  "employees": 120,
+                  "budget_usd": 8000,
+                  "message": "We need workflow automation between our CRM and billing API",
+                  "fit_score": 95,
+                  "tier": "high",
+                  "reasons": [
+                    "company size 11-200 (+25)",
+                    "senior title (+25)",
+                    "budget at least 5000 USD (+30)",
+                    "mentions automation, workflow, crm (+15)"
+                  ],
+                  "scored_by": "rules",
+                  "fallback_reason": null,
+                  "draft_subject": "Re: your enquiry from Acme Logistics",
+                  "draft_body": "Hi Asha,\n\nThanks for getting in touch (Head of Operations at Acme Logistics). I read your note and I think a short call is the quickest way to see whether I can help.\n\nWould a 20 minute call this week suit you?\n\nBest regards",
+                  "status": "pending",
+                  "id": "lead_4",
+                  "updated_at": "2026-11-01T04:07:09.360Z"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Respond 201 lead pending": [
+      {
+        "startTime": 1793506029361,
+        "executionIndex": 6,
+        "source": [
+          {
+            "previousNode": "Write lead (pending)",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 4,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "created_at": "2026-11-01T04:07:09.360Z",
+                  "name": "Asha Rao",
+                  "email": "amvxb6l1l0@acme-logistics.test",
+                  "company": "Acme Logistics",
+                  "title": "Head of Operations",
+                  "employees": 120,
+                  "budget_usd": 8000,
+                  "message": "We need workflow automation between our CRM and billing API",
+                  "fit_score": 95,
+                  "tier": "high",
+                  "reasons": [
+                    "company size 11-200 (+25)",
+                    "senior title (+25)",
+                    "budget at least 5000 USD (+30)",
+                    "mentions automation, workflow, crm (+15)"
+                  ],
+                  "scored_by": "rules",
+                  "fallback_reason": null,
+                  "draft_subject": "Re: your enquiry from Acme Logistics",
+                  "draft_body": "Hi Asha,\n\nThanks for getting in touch (Head of Operations at Acme Logistics). I read your note and I think a short call is the quickest way to see whether I can help.\n\nWould a 20 minute call this week suit you?\n\nBest regards",
+                  "status": "pending",
+                  "id": "lead_4",
+                  "updated_at": "2026-11-01T04:07:09.360Z"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

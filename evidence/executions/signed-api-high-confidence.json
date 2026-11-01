@@ -1,0 +1,362 @@
+{
+  "id": "658",
+  "workflowId": "nDxTbUWlJKRViXEJ",
+  "workflowName": "Webhook to signed API with confidence branch",
+  "nodesInWorkflow": [
+    {
+      "name": "Webhook: event",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "name": "Validate event",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Event valid?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond 400 invalid event",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Respond 202 accepted",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Sign request",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Call signed API",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Confident?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Callback: auto processed",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Add to review queue",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Callback: needs review",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Callback: failed",
+      "type": "n8n-nodes-base.httpRequest"
+    }
+  ],
+  "mode": "webhook",
+  "status": "success",
+  "finished": true,
+  "startedAt": "2026-11-01T04:07:04.490Z",
+  "stoppedAt": "2026-11-01T04:07:04.512Z",
+  "lastNodeExecuted": "Callback: auto processed",
+  "error": null,
+  "nodesRun": [
+    "Webhook: event",
+    "Validate event",
+    "Event valid?",
+    "Respond 202 accepted",
+    "Sign request",
+    "Call signed API",
+    "Confident?",
+    "Callback: auto processed"
+  ],
+  "runData": {
+    "Webhook: event": [
+      {
+        "startTime": 1793506024494,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "headers": {
+                    "host": "127.0.0.1:5690",
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "accept": "*/*",
+                    "accept-language": "*",
+                    "sec-fetch-mode": "cors",
+                    "user-agent": "node",
+                    "accept-encoding": "gzip, deflate",
+                    "content-length": "131"
+                  },
+                  "params": {},
+                  "query": {},
+                  "body": {
+                    "event_id": "evtmvxb6hb91",
+                    "text": "Please refund my last order, it arrived broken",
+                    "callback_url": "http://127.0.0.1:4704/callback"
+                  },
+                  "webhookUrl": "http://127.0.0.1:5690/webhook/signed-intake",
+                  "executionMode": "production"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Validate event": [
+      {
+        "startTime": 1793506024495,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Webhook: event",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 4,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "event": {
+                    "event_id": "evtmvxb6hb91",
+                    "text": "Please refund my last order, it arrived broken",
+                    "callback_url": "http://127.0.0.1:4704/callback"
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Event valid?": [
+      {
+        "startTime": 1793506024499,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Validate event",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "event": {
+                    "event_id": "evtmvxb6hb91",
+                    "text": "Please refund my last order, it arrived broken",
+                    "callback_url": "http://127.0.0.1:4704/callback"
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Respond 202 accepted": [
+      {
+        "startTime": 1793506024500,
+        "executionIndex": 3,
+        "source": [
+          {
+            "previousNode": "Event valid?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "event": {
+                    "event_id": "evtmvxb6hb91",
+                    "text": "Please refund my last order, it arrived broken",
+                    "callback_url": "http://127.0.0.1:4704/callback"
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Sign request": [
+      {
+        "startTime": 1793506024501,
+        "executionIndex": 4,
+        "source": [
+          {
+            "previousNode": "Respond 202 accepted",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 4,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "event": {
+                    "event_id": "evtmvxb6hb91",
+                    "text": "Please refund my last order, it arrived broken",
+                    "callback_url": "http://127.0.0.1:4704/callback"
+                  },
+                  "bodyString": "{\"event_id\":\"evtmvxb6hb91\",\"text\":\"Please refund my last order, it arrived broken\"}",
+                  "timestamp": "1793506024",
+                  "signature": "sha256=73590b4674bea6bee88a698e5f385f990059dce2613a83fcc34a22010b796e20"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Call signed API": [
+      {
+        "startTime": 1793506024505,
+        "executionIndex": 5,
+        "source": [
+          {
+            "previousNode": "Sign request",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "event_id": "evtmvxb6hb91",
+                  "label": "refund_request",
+                  "confidence": 0.95,
+                  "model": "mock-classifier-1"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Confident?": [
+      {
+        "startTime": 1793506024508,
+        "executionIndex": 6,
+        "source": [
+          {
+            "previousNode": "Call signed API",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "event_id": "evtmvxb6hb91",
+                  "label": "refund_request",
+                  "confidence": 0.95,
+                  "model": "mock-classifier-1"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Callback: auto processed": [
+      {
+        "startTime": 1793506024509,
+        "executionIndex": 7,
+        "source": [
+          {
+            "previousNode": "Confident?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "ok": true,
+                  "id": "callback_2"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

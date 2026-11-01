@@ -1,0 +1,1489 @@
+{
+  "id": "652",
+  "workflowId": "Z1mdSsot2j10e8sw",
+  "workflowName": "Scheduled lead digest",
+  "nodesInWorkflow": [
+    {
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger"
+    },
+    {
+      "name": "Compute window",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Fetch leads (all pages)",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Build digest",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Anything to report?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Send digest",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Empty day: send nothing",
+      "type": "n8n-nodes-base.noOp"
+    }
+  ],
+  "mode": "manual",
+  "status": "success",
+  "finished": true,
+  "startedAt": "2026-11-01T04:06:56.140Z",
+  "stoppedAt": "2026-11-01T04:06:56.190Z",
+  "lastNodeExecuted": "Send digest",
+  "error": null,
+  "nodesRun": [
+    "Schedule Trigger",
+    "Compute window",
+    "Fetch leads (all pages)",
+    "Build digest",
+    "Anything to report?",
+    "Send digest"
+  ],
+  "runData": {
+    "Schedule Trigger": [
+      {
+        "startTime": 1793506016169,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "timestamp": "2026-11-01T09:36:56.170+05:30",
+                  "Readable date": "November 1st 2026, 9:36:56 am",
+                  "Readable time": "9:36:56 am",
+                  "Day of week": "Sunday",
+                  "Year": "2026",
+                  "Month": "November",
+                  "Day of month": "01",
+                  "Hour": "09",
+                  "Minute": "36",
+                  "Second": "56",
+                  "Timezone": "Asia/Kolkata (UTC+05:30)"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Compute window": [
+      {
+        "startTime": 1793506016170,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Schedule Trigger",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "since": "2026-10-31T04:06:56.172Z",
+                  "until": "2026-11-01T04:06:56.172Z",
+                  "window_hours": 24
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Fetch leads (all pages)": [
+      {
+        "startTime": 1793506016172,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Compute window",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 10,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "rows": [
+                    {
+                      "created_at": "2026-10-31T04:16:56.055Z",
+                      "name": "Lead 119",
+                      "company": "Co 119",
+                      "status": "send_failed",
+                      "fit_score": 89,
+                      "tier": "medium",
+                      "id": "lead_126",
+                      "updated_at": "2026-11-01T04:06:56.055Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:07:56.054Z",
+                      "name": "Lead 118",
+                      "company": "Co 118",
+                      "status": "send_failed",
+                      "fit_score": 88,
+                      "tier": "medium",
+                      "id": "lead_125",
+                      "updated_at": "2026-11-01T04:06:56.055Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:08:56.054Z",
+                      "name": "Lead 117",
+                      "company": "Co 117",
+                      "status": "send_failed",
+                      "fit_score": 87,
+                      "tier": "medium",
+                      "id": "lead_124",
+                      "updated_at": "2026-11-01T04:06:56.054Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:09:56.054Z",
+                      "name": "Lead 116",
+                      "company": "Co 116",
+                      "status": "send_failed",
+                      "fit_score": 86,
+                      "tier": "medium",
+                      "id": "lead_123",
+                      "updated_at": "2026-11-01T04:06:56.054Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:10:56.053Z",
+                      "name": "Lead 115",
+                      "company": "Co 115",
+                      "status": "send_failed",
+                      "fit_score": 85,
+                      "tier": "medium",
+                      "id": "lead_122",
+                      "updated_at": "2026-11-01T04:06:56.054Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:11:56.053Z",
+                      "name": "Lead 114",
+                      "company": "Co 114",
+                      "status": "send_failed",
+                      "fit_score": 84,
+                      "tier": "medium",
+                      "id": "lead_121",
+                      "updated_at": "2026-11-01T04:06:56.053Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:12:56.053Z",
+                      "name": "Lead 113",
+                      "company": "Co 113",
+                      "status": "send_failed",
+                      "fit_score": 83,
+                      "tier": "medium",
+                      "id": "lead_120",
+                      "updated_at": "2026-11-01T04:06:56.053Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:13:56.052Z",
+                      "name": "Lead 112",
+                      "company": "Co 112",
+                      "status": "send_failed",
+                      "fit_score": 82,
+                      "tier": "medium",
+                      "id": "lead_119",
+                      "updated_at": "2026-11-01T04:06:56.052Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:14:56.052Z",
+                      "name": "Lead 111",
+                      "company": "Co 111",
+                      "status": "send_failed",
+                      "fit_score": 81,
+                      "tier": "medium",
+                      "id": "lead_118",
+                      "updated_at": "2026-11-01T04:06:56.052Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:15:56.051Z",
+                      "name": "Lead 110",
+                      "company": "Co 110",
+                      "status": "send_failed",
+                      "fit_score": 80,
+                      "tier": "medium",
+                      "id": "lead_117",
+                      "updated_at": "2026-11-01T04:06:56.051Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:16:56.051Z",
+                      "name": "Lead 109",
+                      "company": "Co 109",
+                      "status": "send_failed",
+                      "fit_score": 79,
+                      "tier": "medium",
+                      "id": "lead_116",
+                      "updated_at": "2026-11-01T04:06:56.051Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:17:56.050Z",
+                      "name": "Lead 108",
+                      "company": "Co 108",
+                      "status": "send_failed",
+                      "fit_score": 78,
+                      "tier": "medium",
+                      "id": "lead_115",
+                      "updated_at": "2026-11-01T04:06:56.051Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:18:56.050Z",
+                      "name": "Lead 107",
+                      "company": "Co 107",
+                      "status": "send_failed",
+                      "fit_score": 77,
+                      "tier": "medium",
+                      "id": "lead_114",
+                      "updated_at": "2026-11-01T04:06:56.050Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:19:56.050Z",
+                      "name": "Lead 106",
+                      "company": "Co 106",
+                      "status": "send_failed",
+                      "fit_score": 76,
+                      "tier": "medium",
+                      "id": "lead_113",
+                      "updated_at": "2026-11-01T04:06:56.050Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:20:56.049Z",
+                      "name": "Lead 105",
+                      "company": "Co 105",
+                      "status": "send_failed",
+                      "fit_score": 75,
+                      "tier": "medium",
+                      "id": "lead_112",
+                      "updated_at": "2026-11-01T04:06:56.049Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:21:56.049Z",
+                      "name": "Lead 104",
+                      "company": "Co 104",
+                      "status": "send_failed",
+                      "fit_score": 74,
+                      "tier": "medium",
+                      "id": "lead_111",
+                      "updated_at": "2026-11-01T04:06:56.049Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:22:56.049Z",
+                      "name": "Lead 103",
+                      "company": "Co 103",
+                      "status": "send_failed",
+                      "fit_score": 73,
+                      "tier": "medium",
+                      "id": "lead_110",
+                      "updated_at": "2026-11-01T04:06:56.049Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:23:56.048Z",
+                      "name": "Lead 102",
+                      "company": "Co 102",
+                      "status": "send_failed",
+                      "fit_score": 72,
+                      "tier": "medium",
+                      "id": "lead_109",
+                      "updated_at": "2026-11-01T04:06:56.048Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:24:56.048Z",
+                      "name": "Lead 101",
+                      "company": "Co 101",
+                      "status": "send_failed",
+                      "fit_score": 71,
+                      "tier": "medium",
+                      "id": "lead_108",
+                      "updated_at": "2026-11-01T04:06:56.048Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:25:56.048Z",
+                      "name": "Lead 100",
+                      "company": "Co 100",
+                      "status": "send_failed",
+                      "fit_score": 70,
+                      "tier": "medium",
+                      "id": "lead_107",
+                      "updated_at": "2026-11-01T04:06:56.048Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:26:56.047Z",
+                      "name": "Lead 99",
+                      "company": "Co 99",
+                      "status": "sent",
+                      "fit_score": 69,
+                      "tier": "medium",
+                      "id": "lead_106",
+                      "updated_at": "2026-11-01T04:06:56.047Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:27:56.047Z",
+                      "name": "Lead 98",
+                      "company": "Co 98",
+                      "status": "sent",
+                      "fit_score": 68,
+                      "tier": "medium",
+                      "id": "lead_105",
+                      "updated_at": "2026-11-01T04:06:56.047Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:28:56.047Z",
+                      "name": "Lead 97",
+                      "company": "Co 97",
+                      "status": "sent",
+                      "fit_score": 67,
+                      "tier": "medium",
+                      "id": "lead_104",
+                      "updated_at": "2026-11-01T04:06:56.047Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:29:56.046Z",
+                      "name": "Lead 96",
+                      "company": "Co 96",
+                      "status": "sent",
+                      "fit_score": 66,
+                      "tier": "medium",
+                      "id": "lead_103",
+                      "updated_at": "2026-11-01T04:06:56.046Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:30:56.046Z",
+                      "name": "Lead 95",
+                      "company": "Co 95",
+                      "status": "sent",
+                      "fit_score": 65,
+                      "tier": "medium",
+                      "id": "lead_102",
+                      "updated_at": "2026-11-01T04:06:56.046Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:31:56.045Z",
+                      "name": "Lead 94",
+                      "company": "Co 94",
+                      "status": "sent",
+                      "fit_score": 64,
+                      "tier": "medium",
+                      "id": "lead_101",
+                      "updated_at": "2026-11-01T04:06:56.046Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:32:56.045Z",
+                      "name": "Lead 93",
+                      "company": "Co 93",
+                      "status": "sent",
+                      "fit_score": 63,
+                      "tier": "medium",
+                      "id": "lead_100",
+                      "updated_at": "2026-11-01T04:06:56.045Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:33:56.045Z",
+                      "name": "Lead 92",
+                      "company": "Co 92",
+                      "status": "sent",
+                      "fit_score": 62,
+                      "tier": "medium",
+                      "id": "lead_99",
+                      "updated_at": "2026-11-01T04:06:56.045Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:34:56.044Z",
+                      "name": "Lead 91",
+                      "company": "Co 91",
+                      "status": "sent",
+                      "fit_score": 61,
+                      "tier": "medium",
+                      "id": "lead_98",
+                      "updated_at": "2026-11-01T04:06:56.045Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:35:56.044Z",
+                      "name": "Lead 90",
+                      "company": "Co 90",
+                      "status": "sent",
+                      "fit_score": 60,
+                      "tier": "medium",
+                      "id": "lead_97",
+                      "updated_at": "2026-11-01T04:06:56.044Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:36:56.044Z",
+                      "name": "Lead 89",
+                      "company": "Co 89",
+                      "status": "sent",
+                      "fit_score": 59,
+                      "tier": "medium",
+                      "id": "lead_96",
+                      "updated_at": "2026-11-01T04:06:56.044Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:37:56.043Z",
+                      "name": "Lead 88",
+                      "company": "Co 88",
+                      "status": "sent",
+                      "fit_score": 58,
+                      "tier": "medium",
+                      "id": "lead_95",
+                      "updated_at": "2026-11-01T04:06:56.043Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:38:56.043Z",
+                      "name": "Lead 87",
+                      "company": "Co 87",
+                      "status": "sent",
+                      "fit_score": 57,
+                      "tier": "medium",
+                      "id": "lead_94",
+                      "updated_at": "2026-11-01T04:06:56.043Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:39:56.043Z",
+                      "name": "Lead 86",
+                      "company": "Co 86",
+                      "status": "sent",
+                      "fit_score": 56,
+                      "tier": "medium",
+                      "id": "lead_93",
+                      "updated_at": "2026-11-01T04:06:56.043Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:40:56.042Z",
+                      "name": "Lead 85",
+                      "company": "Co 85",
+                      "status": "sent",
+                      "fit_score": 55,
+                      "tier": "medium",
+                      "id": "lead_92",
+                      "updated_at": "2026-11-01T04:06:56.042Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:41:56.042Z",
+                      "name": "Lead 84",
+                      "company": "Co 84",
+                      "status": "sent",
+                      "fit_score": 54,
+                      "tier": "medium",
+                      "id": "lead_91",
+                      "updated_at": "2026-11-01T04:06:56.042Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:42:56.042Z",
+                      "name": "Lead 83",
+                      "company": "Co 83",
+                      "status": "sent",
+                      "fit_score": 53,
+                      "tier": "medium",
+                      "id": "lead_90",
+                      "updated_at": "2026-11-01T04:06:56.042Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:43:56.041Z",
+                      "name": "Lead 82",
+                      "company": "Co 82",
+                      "status": "sent",
+                      "fit_score": 52,
+                      "tier": "medium",
+                      "id": "lead_89",
+                      "updated_at": "2026-11-01T04:06:56.041Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:44:56.041Z",
+                      "name": "Lead 81",
+                      "company": "Co 81",
+                      "status": "sent",
+                      "fit_score": 51,
+                      "tier": "medium",
+                      "id": "lead_88",
+                      "updated_at": "2026-11-01T04:06:56.041Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:45:56.041Z",
+                      "name": "Lead 80",
+                      "company": "Co 80",
+                      "status": "sent",
+                      "fit_score": 50,
+                      "tier": "medium",
+                      "id": "lead_87",
+                      "updated_at": "2026-11-01T04:06:56.041Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:46:56.040Z",
+                      "name": "Lead 79",
+                      "company": "Co 79",
+                      "status": "sent",
+                      "fit_score": 89,
+                      "tier": "medium",
+                      "id": "lead_86",
+                      "updated_at": "2026-11-01T04:06:56.040Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:47:56.040Z",
+                      "name": "Lead 78",
+                      "company": "Co 78",
+                      "status": "sent",
+                      "fit_score": 88,
+                      "tier": "medium",
+                      "id": "lead_85",
+                      "updated_at": "2026-11-01T04:06:56.040Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:48:56.039Z",
+                      "name": "Lead 77",
+                      "company": "Co 77",
+                      "status": "sent",
+                      "fit_score": 87,
+                      "tier": "medium",
+                      "id": "lead_84",
+                      "updated_at": "2026-11-01T04:06:56.040Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:49:56.039Z",
+                      "name": "Lead 76",
+                      "company": "Co 76",
+                      "status": "sent",
+                      "fit_score": 86,
+                      "tier": "medium",
+                      "id": "lead_83",
+                      "updated_at": "2026-11-01T04:06:56.039Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:50:56.039Z",
+                      "name": "Lead 75",
+                      "company": "Co 75",
+                      "status": "sent",
+                      "fit_score": 85,
+                      "tier": "medium",
+                      "id": "lead_82",
+                      "updated_at": "2026-11-01T04:06:56.039Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:51:56.038Z",
+                      "name": "Lead 74",
+                      "company": "Co 74",
+                      "status": "sent",
+                      "fit_score": 84,
+                      "tier": "medium",
+                      "id": "lead_81",
+                      "updated_at": "2026-11-01T04:06:56.039Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:52:56.038Z",
+                      "name": "Lead 73",
+                      "company": "Co 73",
+                      "status": "sent",
+                      "fit_score": 83,
+                      "tier": "medium",
+                      "id": "lead_80",
+                      "updated_at": "2026-11-01T04:06:56.038Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:53:56.038Z",
+                      "name": "Lead 72",
+                      "company": "Co 72",
+                      "status": "sent",
+                      "fit_score": 82,
+                      "tier": "medium",
+                      "id": "lead_79",
+                      "updated_at": "2026-11-01T04:06:56.038Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:54:56.037Z",
+                      "name": "Lead 71",
+                      "company": "Co 71",
+                      "status": "sent",
+                      "fit_score": 81,
+                      "tier": "medium",
+                      "id": "lead_78",
+                      "updated_at": "2026-11-01T04:06:56.038Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:55:56.037Z",
+                      "name": "Lead 70",
+                      "company": "Co 70",
+                      "status": "sent",
+                      "fit_score": 80,
+                      "tier": "medium",
+                      "id": "lead_77",
+                      "updated_at": "2026-11-01T04:06:56.037Z"
+                    }
+                  ],
+                  "page": 1,
+                  "page_size": 50,
+                  "total": 120,
+                  "has_more": true
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              },
+              {
+                "json": {
+                  "rows": [
+                    {
+                      "created_at": "2026-11-01T02:56:56.037Z",
+                      "name": "Lead 69",
+                      "company": "Co 69",
+                      "status": "sent",
+                      "fit_score": 79,
+                      "tier": "medium",
+                      "id": "lead_76",
+                      "updated_at": "2026-11-01T04:06:56.037Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:57:56.036Z",
+                      "name": "Lead 68",
+                      "company": "Co 68",
+                      "status": "sent",
+                      "fit_score": 78,
+                      "tier": "medium",
+                      "id": "lead_75",
+                      "updated_at": "2026-11-01T04:06:56.037Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:58:56.036Z",
+                      "name": "Lead 67",
+                      "company": "Co 67",
+                      "status": "sent",
+                      "fit_score": 77,
+                      "tier": "medium",
+                      "id": "lead_74",
+                      "updated_at": "2026-11-01T04:06:56.036Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T02:59:56.036Z",
+                      "name": "Lead 66",
+                      "company": "Co 66",
+                      "status": "sent",
+                      "fit_score": 76,
+                      "tier": "medium",
+                      "id": "lead_73",
+                      "updated_at": "2026-11-01T04:06:56.036Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:00:56.035Z",
+                      "name": "Lead 65",
+                      "company": "Co 65",
+                      "status": "sent",
+                      "fit_score": 75,
+                      "tier": "medium",
+                      "id": "lead_72",
+                      "updated_at": "2026-11-01T04:06:56.036Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:01:56.035Z",
+                      "name": "Lead 64",
+                      "company": "Co 64",
+                      "status": "sent",
+                      "fit_score": 74,
+                      "tier": "medium",
+                      "id": "lead_71",
+                      "updated_at": "2026-11-01T04:06:56.035Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:02:56.035Z",
+                      "name": "Lead 63",
+                      "company": "Co 63",
+                      "status": "sent",
+                      "fit_score": 73,
+                      "tier": "medium",
+                      "id": "lead_70",
+                      "updated_at": "2026-11-01T04:06:56.035Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:03:56.034Z",
+                      "name": "Lead 62",
+                      "company": "Co 62",
+                      "status": "sent",
+                      "fit_score": 72,
+                      "tier": "medium",
+                      "id": "lead_69",
+                      "updated_at": "2026-11-01T04:06:56.034Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:04:56.034Z",
+                      "name": "Lead 61",
+                      "company": "Co 61",
+                      "status": "sent",
+                      "fit_score": 71,
+                      "tier": "medium",
+                      "id": "lead_68",
+                      "updated_at": "2026-11-01T04:06:56.034Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:05:56.033Z",
+                      "name": "Lead 60",
+                      "company": "Co 60",
+                      "status": "sent",
+                      "fit_score": 70,
+                      "tier": "medium",
+                      "id": "lead_67",
+                      "updated_at": "2026-11-01T04:06:56.034Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:06:56.033Z",
+                      "name": "Lead 59",
+                      "company": "Co 59",
+                      "status": "pending",
+                      "fit_score": 69,
+                      "tier": "medium",
+                      "id": "lead_66",
+                      "updated_at": "2026-11-01T04:06:56.033Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:07:56.033Z",
+                      "name": "Lead 58",
+                      "company": "Co 58",
+                      "status": "pending",
+                      "fit_score": 68,
+                      "tier": "medium",
+                      "id": "lead_65",
+                      "updated_at": "2026-11-01T04:06:56.033Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:08:56.032Z",
+                      "name": "Lead 57",
+                      "company": "Co 57",
+                      "status": "pending",
+                      "fit_score": 67,
+                      "tier": "medium",
+                      "id": "lead_64",
+                      "updated_at": "2026-11-01T04:06:56.032Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:09:56.032Z",
+                      "name": "Lead 56",
+                      "company": "Co 56",
+                      "status": "pending",
+                      "fit_score": 66,
+                      "tier": "medium",
+                      "id": "lead_63",
+                      "updated_at": "2026-11-01T04:06:56.032Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:10:56.031Z",
+                      "name": "Lead 55",
+                      "company": "Co 55",
+                      "status": "pending",
+                      "fit_score": 65,
+                      "tier": "medium",
+                      "id": "lead_62",
+                      "updated_at": "2026-11-01T04:06:56.031Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:11:56.030Z",
+                      "name": "Lead 54",
+                      "company": "Co 54",
+                      "status": "pending",
+                      "fit_score": 64,
+                      "tier": "medium",
+                      "id": "lead_61",
+                      "updated_at": "2026-11-01T04:06:56.031Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:12:56.030Z",
+                      "name": "Lead 53",
+                      "company": "Co 53",
+                      "status": "pending",
+                      "fit_score": 63,
+                      "tier": "medium",
+                      "id": "lead_60",
+                      "updated_at": "2026-11-01T04:06:56.030Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:13:56.029Z",
+                      "name": "Lead 52",
+                      "company": "Co 52",
+                      "status": "pending",
+                      "fit_score": 62,
+                      "tier": "medium",
+                      "id": "lead_59",
+                      "updated_at": "2026-11-01T04:06:56.030Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:14:56.029Z",
+                      "name": "Lead 51",
+                      "company": "Co 51",
+                      "status": "pending",
+                      "fit_score": 61,
+                      "tier": "medium",
+                      "id": "lead_58",
+                      "updated_at": "2026-11-01T04:06:56.029Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:15:56.028Z",
+                      "name": "Lead 50",
+                      "company": "Co 50",
+                      "status": "pending",
+                      "fit_score": 60,
+                      "tier": "medium",
+                      "id": "lead_57",
+                      "updated_at": "2026-11-01T04:06:56.028Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:16:56.027Z",
+                      "name": "Lead 49",
+                      "company": "Co 49",
+                      "status": "pending",
+                      "fit_score": 59,
+                      "tier": "medium",
+                      "id": "lead_56",
+                      "updated_at": "2026-11-01T04:06:56.027Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:17:56.026Z",
+                      "name": "Lead 48",
+                      "company": "Co 48",
+                      "status": "pending",
+                      "fit_score": 58,
+                      "tier": "medium",
+                      "id": "lead_55",
+                      "updated_at": "2026-11-01T04:06:56.027Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:18:56.026Z",
+                      "name": "Lead 47",
+                      "company": "Co 47",
+                      "status": "pending",
+                      "fit_score": 57,
+                      "tier": "medium",
+                      "id": "lead_54",
+                      "updated_at": "2026-11-01T04:06:56.026Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:19:56.025Z",
+                      "name": "Lead 46",
+                      "company": "Co 46",
+                      "status": "pending",
+                      "fit_score": 56,
+                      "tier": "medium",
+                      "id": "lead_53",
+                      "updated_at": "2026-11-01T04:06:56.026Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:20:56.025Z",
+                      "name": "Lead 45",
+                      "company": "Co 45",
+                      "status": "pending",
+                      "fit_score": 55,
+                      "tier": "medium",
+                      "id": "lead_52",
+                      "updated_at": "2026-11-01T04:06:56.025Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:21:56.024Z",
+                      "name": "Lead 44",
+                      "company": "Co 44",
+                      "status": "pending",
+                      "fit_score": 54,
+                      "tier": "medium",
+                      "id": "lead_51",
+                      "updated_at": "2026-11-01T04:06:56.025Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:22:56.024Z",
+                      "name": "Lead 43",
+                      "company": "Co 43",
+                      "status": "pending",
+                      "fit_score": 53,
+                      "tier": "medium",
+                      "id": "lead_50",
+                      "updated_at": "2026-11-01T04:06:56.024Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:23:56.024Z",
+                      "name": "Lead 42",
+                      "company": "Co 42",
+                      "status": "pending",
+                      "fit_score": 52,
+                      "tier": "medium",
+                      "id": "lead_49",
+                      "updated_at": "2026-11-01T04:06:56.024Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:24:56.023Z",
+                      "name": "Lead 41",
+                      "company": "Co 41",
+                      "status": "pending",
+                      "fit_score": 51,
+                      "tier": "medium",
+                      "id": "lead_48",
+                      "updated_at": "2026-11-01T04:06:56.023Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:25:56.023Z",
+                      "name": "Lead 40",
+                      "company": "Co 40",
+                      "status": "pending",
+                      "fit_score": 50,
+                      "tier": "medium",
+                      "id": "lead_47",
+                      "updated_at": "2026-11-01T04:06:56.023Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:26:56.022Z",
+                      "name": "Lead 39",
+                      "company": "Co 39",
+                      "status": "pending",
+                      "fit_score": 89,
+                      "tier": "medium",
+                      "id": "lead_46",
+                      "updated_at": "2026-11-01T04:06:56.023Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:27:56.022Z",
+                      "name": "Lead 38",
+                      "company": "Co 38",
+                      "status": "pending",
+                      "fit_score": 88,
+                      "tier": "medium",
+                      "id": "lead_45",
+                      "updated_at": "2026-11-01T04:06:56.022Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:28:56.022Z",
+                      "name": "Lead 37",
+                      "company": "Co 37",
+                      "status": "pending",
+                      "fit_score": 87,
+                      "tier": "medium",
+                      "id": "lead_44",
+                      "updated_at": "2026-11-01T04:06:56.022Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:29:56.021Z",
+                      "name": "Lead 36",
+                      "company": "Co 36",
+                      "status": "pending",
+                      "fit_score": 86,
+                      "tier": "medium",
+                      "id": "lead_43",
+                      "updated_at": "2026-11-01T04:06:56.021Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:30:56.021Z",
+                      "name": "Lead 35",
+                      "company": "Co 35",
+                      "status": "pending",
+                      "fit_score": 85,
+                      "tier": "medium",
+                      "id": "lead_42",
+                      "updated_at": "2026-11-01T04:06:56.021Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:31:56.020Z",
+                      "name": "Lead 34",
+                      "company": "Co 34",
+                      "status": "pending",
+                      "fit_score": 84,
+                      "tier": "medium",
+                      "id": "lead_41",
+                      "updated_at": "2026-11-01T04:06:56.021Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:32:56.020Z",
+                      "name": "Lead 33",
+                      "company": "Co 33",
+                      "status": "pending",
+                      "fit_score": 83,
+                      "tier": "medium",
+                      "id": "lead_40",
+                      "updated_at": "2026-11-01T04:06:56.020Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:33:56.020Z",
+                      "name": "Lead 32",
+                      "company": "Co 32",
+                      "status": "pending",
+                      "fit_score": 82,
+                      "tier": "medium",
+                      "id": "lead_39",
+                      "updated_at": "2026-11-01T04:06:56.020Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:34:56.019Z",
+                      "name": "Lead 31",
+                      "company": "Co 31",
+                      "status": "pending",
+                      "fit_score": 81,
+                      "tier": "medium",
+                      "id": "lead_38",
+                      "updated_at": "2026-11-01T04:06:56.020Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:35:56.019Z",
+                      "name": "Lead 30",
+                      "company": "Co 30",
+                      "status": "pending",
+                      "fit_score": 80,
+                      "tier": "medium",
+                      "id": "lead_37",
+                      "updated_at": "2026-11-01T04:06:56.019Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:36:56.019Z",
+                      "name": "Lead 29",
+                      "company": "Co 29",
+                      "status": "pending",
+                      "fit_score": 79,
+                      "tier": "medium",
+                      "id": "lead_36",
+                      "updated_at": "2026-11-01T04:06:56.019Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:37:56.018Z",
+                      "name": "Lead 28",
+                      "company": "Co 28",
+                      "status": "pending",
+                      "fit_score": 78,
+                      "tier": "medium",
+                      "id": "lead_35",
+                      "updated_at": "2026-11-01T04:06:56.018Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:38:56.018Z",
+                      "name": "Lead 27",
+                      "company": "Co 27",
+                      "status": "pending",
+                      "fit_score": 77,
+                      "tier": "medium",
+                      "id": "lead_34",
+                      "updated_at": "2026-11-01T04:06:56.018Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:39:56.017Z",
+                      "name": "Lead 26",
+                      "company": "Co 26",
+                      "status": "pending",
+                      "fit_score": 76,
+                      "tier": "medium",
+                      "id": "lead_33",
+                      "updated_at": "2026-11-01T04:06:56.018Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:40:56.016Z",
+                      "name": "Lead 25",
+                      "company": "Co 25",
+                      "status": "pending",
+                      "fit_score": 75,
+                      "tier": "medium",
+                      "id": "lead_32",
+                      "updated_at": "2026-11-01T04:06:56.017Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:41:56.015Z",
+                      "name": "Lead 24",
+                      "company": "Co 24",
+                      "status": "pending",
+                      "fit_score": 74,
+                      "tier": "medium",
+                      "id": "lead_31",
+                      "updated_at": "2026-11-01T04:06:56.015Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:42:56.014Z",
+                      "name": "Lead 23",
+                      "company": "Co 23",
+                      "status": "pending",
+                      "fit_score": 73,
+                      "tier": "medium",
+                      "id": "lead_30",
+                      "updated_at": "2026-11-01T04:06:56.014Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:43:56.010Z",
+                      "name": "Lead 22",
+                      "company": "Co 22",
+                      "status": "pending",
+                      "fit_score": 72,
+                      "tier": "medium",
+                      "id": "lead_29",
+                      "updated_at": "2026-11-01T04:06:56.013Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:44:56.009Z",
+                      "name": "Lead 21",
+                      "company": "Co 21",
+                      "status": "pending",
+                      "fit_score": 71,
+                      "tier": "medium",
+                      "id": "lead_28",
+                      "updated_at": "2026-11-01T04:06:56.010Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:45:56.009Z",
+                      "name": "Lead 20",
+                      "company": "Co 20",
+                      "status": "pending",
+                      "fit_score": 70,
+                      "tier": "medium",
+                      "id": "lead_27",
+                      "updated_at": "2026-11-01T04:06:56.009Z"
+                    }
+                  ],
+                  "page": 2,
+                  "page_size": 50,
+                  "total": 120,
+                  "has_more": true
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              },
+              {
+                "json": {
+                  "rows": [
+                    {
+                      "created_at": "2026-11-01T03:46:56.009Z",
+                      "name": "Lead 19",
+                      "company": "Co 19",
+                      "status": "pending",
+                      "fit_score": 69,
+                      "tier": "medium",
+                      "id": "lead_26",
+                      "updated_at": "2026-11-01T04:06:56.009Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:47:56.008Z",
+                      "name": "Lead 18",
+                      "company": "Co 18",
+                      "status": "pending",
+                      "fit_score": 68,
+                      "tier": "medium",
+                      "id": "lead_25",
+                      "updated_at": "2026-11-01T04:06:56.008Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:48:56.008Z",
+                      "name": "Lead 17",
+                      "company": "Co 17",
+                      "status": "pending",
+                      "fit_score": 67,
+                      "tier": "medium",
+                      "id": "lead_24",
+                      "updated_at": "2026-11-01T04:06:56.008Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:49:56.007Z",
+                      "name": "Lead 16",
+                      "company": "Co 16",
+                      "status": "pending",
+                      "fit_score": 66,
+                      "tier": "medium",
+                      "id": "lead_23",
+                      "updated_at": "2026-11-01T04:06:56.008Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:50:56.007Z",
+                      "name": "Lead 15",
+                      "company": "Co 15",
+                      "status": "pending",
+                      "fit_score": 65,
+                      "tier": "medium",
+                      "id": "lead_22",
+                      "updated_at": "2026-11-01T04:06:56.007Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:51:56.007Z",
+                      "name": "Lead 14",
+                      "company": "Co 14",
+                      "status": "pending",
+                      "fit_score": 64,
+                      "tier": "medium",
+                      "id": "lead_21",
+                      "updated_at": "2026-11-01T04:06:56.007Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:52:56.006Z",
+                      "name": "Lead 13",
+                      "company": "Co 13",
+                      "status": "pending",
+                      "fit_score": 63,
+                      "tier": "medium",
+                      "id": "lead_20",
+                      "updated_at": "2026-11-01T04:06:56.006Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:53:56.006Z",
+                      "name": "Lead 12",
+                      "company": "Co 12",
+                      "status": "pending",
+                      "fit_score": 62,
+                      "tier": "medium",
+                      "id": "lead_19",
+                      "updated_at": "2026-11-01T04:06:56.006Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:54:56.005Z",
+                      "name": "Lead 11",
+                      "company": "Co 11",
+                      "status": "pending",
+                      "fit_score": 61,
+                      "tier": "medium",
+                      "id": "lead_18",
+                      "updated_at": "2026-11-01T04:06:56.006Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:55:56.005Z",
+                      "name": "Lead 10",
+                      "company": "Co 10",
+                      "status": "pending",
+                      "fit_score": 60,
+                      "tier": "medium",
+                      "id": "lead_17",
+                      "updated_at": "2026-11-01T04:06:56.005Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:56:56.004Z",
+                      "name": "Lead 9",
+                      "company": "Co 9",
+                      "status": "pending",
+                      "fit_score": 59,
+                      "tier": "medium",
+                      "id": "lead_16",
+                      "updated_at": "2026-11-01T04:06:56.005Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:57:56.004Z",
+                      "name": "Lead 8",
+                      "company": "Co 8",
+                      "status": "pending",
+                      "fit_score": 58,
+                      "tier": "medium",
+                      "id": "lead_15",
+                      "updated_at": "2026-11-01T04:06:56.004Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:58:56.003Z",
+                      "name": "Lead 7",
+                      "company": "Co 7",
+                      "status": "pending",
+                      "fit_score": 57,
+                      "tier": "medium",
+                      "id": "lead_14",
+                      "updated_at": "2026-11-01T04:06:56.003Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T03:59:56.002Z",
+                      "name": "Lead 6",
+                      "company": "Co 6",
+                      "status": "pending",
+                      "fit_score": 56,
+                      "tier": "medium",
+                      "id": "lead_13",
+                      "updated_at": "2026-11-01T04:06:56.003Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T04:00:56.002Z",
+                      "name": "Lead 5",
+                      "company": "Co 5",
+                      "status": "pending",
+                      "fit_score": 55,
+                      "tier": "medium",
+                      "id": "lead_12",
+                      "updated_at": "2026-11-01T04:06:56.002Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T04:01:56.001Z",
+                      "name": "Lead 4",
+                      "company": "Co 4",
+                      "status": "pending",
+                      "fit_score": 96,
+                      "tier": "medium",
+                      "id": "lead_11",
+                      "updated_at": "2026-11-01T04:06:56.001Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T04:02:56.001Z",
+                      "name": "Lead 3",
+                      "company": "Co 3",
+                      "status": "pending",
+                      "fit_score": 97,
+                      "tier": "medium",
+                      "id": "lead_10",
+                      "updated_at": "2026-11-01T04:06:56.001Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T04:03:56.000Z",
+                      "name": "Lead 2",
+                      "company": "Co 2",
+                      "status": "pending",
+                      "fit_score": 98,
+                      "tier": "medium",
+                      "id": "lead_9",
+                      "updated_at": "2026-11-01T04:06:56.000Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T04:04:56.000Z",
+                      "name": "Lead 1",
+                      "company": "Co 1",
+                      "status": "pending",
+                      "fit_score": 99,
+                      "tier": "medium",
+                      "id": "lead_8",
+                      "updated_at": "2026-11-01T04:06:56.000Z"
+                    },
+                    {
+                      "created_at": "2026-11-01T04:05:55.999Z",
+                      "name": "Lead 0",
+                      "company": "Co 0",
+                      "status": "pending",
+                      "fit_score": 100,
+                      "tier": "medium",
+                      "id": "lead_7",
+                      "updated_at": "2026-11-01T04:06:55.999Z"
+                    }
+                  ],
+                  "page": 3,
+                  "page_size": 50,
+                  "total": 120,
+                  "has_more": false
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Build digest": [
+      {
+        "startTime": 1793506016182,
+        "executionIndex": 3,
+        "source": [
+          {
+            "previousNode": "Fetch leads (all pages)",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "total": 120,
+                  "pending": 60,
+                  "by_status": {
+                    "send_failed": 20,
+                    "sent": 40,
+                    "pending": 60
+                  },
+                  "to": "leads-digest@n8n-lab.test",
+                  "subject": "Lead digest 2026-11-01: 120 new, 60 awaiting approval",
+                  "body": "Leads created in the last 24 hours: 120\nBy status: pending 60, send_failed 20, sent 40\nAwaiting approval: 60\n\nTop by fit score:\n- lead_7 | Lead 0 (Co 0) | fit 100 medium | pending\n- lead_8 | Lead 1 (Co 1) | fit 99 medium | pending\n- lead_9 | Lead 2 (Co 2) | fit 98 medium | pending\n- lead_10 | Lead 3 (Co 3) | fit 97 medium | pending\n- lead_11 | Lead 4 (Co 4) | fit 96 medium | pending"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Anything to report?": [
+      {
+        "startTime": 1793506016185,
+        "executionIndex": 4,
+        "source": [
+          {
+            "previousNode": "Build digest",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 1,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "total": 120,
+                  "pending": 60,
+                  "by_status": {
+                    "send_failed": 20,
+                    "sent": 40,
+                    "pending": 60
+                  },
+                  "to": "leads-digest@n8n-lab.test",
+                  "subject": "Lead digest 2026-11-01: 120 new, 60 awaiting approval",
+                  "body": "Leads created in the last 24 hours: 120\nBy status: pending 60, send_failed 20, sent 40\nAwaiting approval: 60\n\nTop by fit score:\n- lead_7 | Lead 0 (Co 0) | fit 100 medium | pending\n- lead_8 | Lead 1 (Co 1) | fit 99 medium | pending\n- lead_9 | Lead 2 (Co 2) | fit 98 medium | pending\n- lead_10 | Lead 3 (Co 3) | fit 97 medium | pending\n- lead_11 | Lead 4 (Co 4) | fit 96 medium | pending"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Send digest": [
+      {
+        "startTime": 1793506016186,
+        "executionIndex": 5,
+        "source": [
+          {
+            "previousNode": "Anything to report?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 4,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "queued": true,
+                  "id": "mail_1"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

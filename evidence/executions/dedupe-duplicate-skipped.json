@@ -1,0 +1,321 @@
+{
+  "id": "633",
+  "workflowId": "1C6kj8uqeHEWtUPD",
+  "workflowName": "Retry, dedupe and error handling",
+  "nodesInWorkflow": [
+    {
+      "name": "Webhook: event",
+      "type": "n8n-nodes-base.webhook"
+    },
+    {
+      "name": "Validate event",
+      "type": "n8n-nodes-base.code"
+    },
+    {
+      "name": "Event valid?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond 400 invalid event",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Claim event id",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "First delivery?",
+      "type": "n8n-nodes-base.if"
+    },
+    {
+      "name": "Respond duplicate",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Call flaky API",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Mark claim done",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 200 processed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Release claim",
+      "type": "n8n-nodes-base.httpRequest"
+    },
+    {
+      "name": "Respond 502 failed",
+      "type": "n8n-nodes-base.respondToWebhook"
+    },
+    {
+      "name": "Fail execution",
+      "type": "n8n-nodes-base.stopAndError"
+    }
+  ],
+  "mode": "webhook",
+  "status": "success",
+  "finished": true,
+  "startedAt": "2026-11-01T04:06:52.208Z",
+  "stoppedAt": "2026-11-01T04:06:52.255Z",
+  "lastNodeExecuted": "Respond duplicate",
+  "error": null,
+  "nodesRun": [
+    "Webhook: event",
+    "Validate event",
+    "Event valid?",
+    "Claim event id",
+    "First delivery?",
+    "Respond duplicate"
+  ],
+  "runData": {
+    "Webhook: event": [
+      {
+        "startTime": 1793506012239,
+        "executionIndex": 0,
+        "source": [],
+        "hints": [],
+        "executionTime": 0,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "headers": {
+                    "host": "127.0.0.1:5690",
+                    "connection": "keep-alive",
+                    "content-type": "application/json",
+                    "accept": "*/*",
+                    "accept-language": "*",
+                    "sec-fetch-mode": "cors",
+                    "user-agent": "node",
+                    "accept-encoding": "gzip, deflate",
+                    "content-length": "65"
+                  },
+                  "params": {},
+                  "query": {},
+                  "body": {
+                    "event_id": "dupmvxb67tc6",
+                    "type": "order.created",
+                    "data": {
+                      "n": 2
+                    }
+                  },
+                  "webhookUrl": "http://127.0.0.1:5690/webhook/events",
+                  "executionMode": "production"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Validate event": [
+      {
+        "startTime": 1793506012239,
+        "executionIndex": 1,
+        "source": [
+          {
+            "previousNode": "Webhook: event",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 3,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "event_id": "dupmvxb67tc6",
+                  "type": "order.created",
+                  "data": {
+                    "n": 2
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Event valid?": [
+      {
+        "startTime": 1793506012242,
+        "executionIndex": 2,
+        "source": [
+          {
+            "previousNode": "Validate event",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "valid": true,
+                  "errors": [],
+                  "event_id": "dupmvxb67tc6",
+                  "type": "order.created",
+                  "data": {
+                    "n": 2
+                  }
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ],
+            []
+          ]
+        }
+      }
+    ],
+    "Claim event id": [
+      {
+        "startTime": 1793506012244,
+        "executionIndex": 3,
+        "source": [
+          {
+            "previousNode": "Event valid?",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 2,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "error": "duplicate_key",
+                    "id": "dupmvxb67tc6",
+                    "existing_status": "done"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "70",
+                    "date": "Sun, 01 Nov 2026 04:06:52 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 409,
+                  "statusMessage": "Conflict"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "First delivery?": [
+      {
+        "startTime": 1793506012247,
+        "executionIndex": 4,
+        "source": [
+          {
+            "previousNode": "Claim event id",
+            "previousNodeOutput": 0,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 0,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [],
+            [
+              {
+                "json": {
+                  "body": {
+                    "error": "duplicate_key",
+                    "id": "dupmvxb67tc6",
+                    "existing_status": "done"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "70",
+                    "date": "Sun, 01 Nov 2026 04:06:52 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 409,
+                  "statusMessage": "Conflict"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "Respond duplicate": [
+      {
+        "startTime": 1793506012248,
+        "executionIndex": 5,
+        "source": [
+          {
+            "previousNode": "First delivery?",
+            "previousNodeOutput": 1,
+            "previousNodeRun": 0
+          }
+        ],
+        "hints": [],
+        "executionTime": 7,
+        "executionStatus": "success",
+        "data": {
+          "main": [
+            [
+              {
+                "json": {
+                  "body": {
+                    "error": "duplicate_key",
+                    "id": "dupmvxb67tc6",
+                    "existing_status": "done"
+                  },
+                  "headers": {
+                    "content-type": "application/json",
+                    "content-length": "70",
+                    "date": "Sun, 01 Nov 2026 04:06:52 GMT",
+                    "connection": "close"
+                  },
+                  "statusCode": 409,
+                  "statusMessage": "Conflict"
+                },
+                "pairedItem": {
+                  "item": 0
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}
