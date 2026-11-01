@@ -1,0 +1,467 @@
+{
+  "n8nVersion": "2.45.7",
+  "ranAt": "2026-11-01T04:43:29.536Z",
+  "perMutantTimeoutSeconds": 600,
+  "totalMinutes": 35.6,
+  "baseline": {
+    "tests": 97,
+    "failed": 0
+  },
+  "summary": {
+    "total": 49,
+    "killed": 49,
+    "survived": 0,
+    "timeout": 0,
+    "error": 0
+  },
+  "control": {
+    "id": "control-notes-only",
+    "outcome": "survived",
+    "testsFailed": 0,
+    "firstFailingTest": null,
+    "seconds": 11
+  },
+  "mutants": [
+    {
+      "id": "gate-flip-claim-if",
+      "workflow": "lead-approval-gate.json",
+      "change": "flip the \"Claim won?\" condition",
+      "outcome": "killed",
+      "testsFailed": 5,
+      "firstFailingTest": "lead approval gate (rules variant) approval sends exactly once, with the stored draft, only after approval",
+      "seconds": 9
+    },
+    {
+      "id": "gate-remove-approval-check",
+      "workflow": "lead-approval-gate.json",
+      "change": "the \"Claim won?\" check always passes (second approvals go on to send)",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "lead approval gate (rules variant) approval approving twice does not send twice",
+      "seconds": 9
+    },
+    {
+      "id": "gate-send-before-approval",
+      "workflow": "lead-approval-gate.json",
+      "change": "intake goes straight to Send email (no approval needed)",
+      "outcome": "killed",
+      "testsFailed": 7,
+      "firstFailingTest": "lead approval gate (rules variant) intake stores a valid lead as pending with a draft, scores it, and sends nothing",
+      "seconds": 10
+    },
+    {
+      "id": "gate-claim-without-precondition",
+      "workflow": "lead-approval-gate.json",
+      "change": "drop the if_status precondition from \"Claim for sending\"",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "lead approval gate (rules variant) approval approving twice does not send twice",
+      "seconds": 10
+    },
+    {
+      "id": "gate-allow-resend-after-sent",
+      "workflow": "lead-approval-gate.json",
+      "change": "claim also accepts leads that are already sent",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "lead approval gate (rules variant) approval approving twice does not send twice",
+      "seconds": 11
+    },
+    {
+      "id": "gate-skip-not-found-check",
+      "workflow": "lead-approval-gate.json",
+      "change": "the \"Lead found?\" check always passes (unknown id is not reported as 404)",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "lead approval gate (rules variant) approval answers 404 with a clear error for an unknown id and sends nothing",
+      "seconds": 11
+    },
+    {
+      "id": "gate-lookup-failure-always-404",
+      "workflow": "lead-approval-gate.json",
+      "change": "a storage failure on lookup is reported as 404 lead_not_found",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "lead approval gate (rules variant) approval answers 502 and sends nothing when the table API is down at approval time",
+      "seconds": 10
+    },
+    {
+      "id": "gate-flip-lead-valid",
+      "workflow": "lead-approval-gate.json",
+      "change": "flip the \"Lead valid?\" condition",
+      "outcome": "killed",
+      "testsFailed": 19,
+      "firstFailingTest": "lead approval gate (rules variant) intake stores a valid lead as pending with a draft, scores it, and sends nothing",
+      "seconds": 9
+    },
+    {
+      "id": "gate-flip-approval-valid",
+      "workflow": "lead-approval-gate.json",
+      "change": "flip the \"Approval valid?\" condition",
+      "outcome": "killed",
+      "testsFailed": 12,
+      "firstFailingTest": "lead approval gate (rules variant) approval sends exactly once, with the stored draft, only after approval",
+      "seconds": 11
+    },
+    {
+      "id": "gate-store-as-approved",
+      "workflow": "lead-approval-gate.json",
+      "change": "intake stores the lead with status approved instead of pending",
+      "outcome": "killed",
+      "testsFailed": 8,
+      "firstFailingTest": "lead approval gate (rules variant) intake stores a valid lead as pending with a draft, scores it, and sends nothing",
+      "seconds": 16
+    },
+    {
+      "id": "gate-tier-cutoff",
+      "workflow": "lead-approval-gate.json",
+      "change": "medium tier starts at 65 instead of 40",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "lead approval gate (rules variant) intake scores the three fixture leads into three different tiers",
+      "seconds": 14
+    },
+    {
+      "id": "gate-budget-weight",
+      "workflow": "lead-approval-gate.json",
+      "change": "budget over 5000 USD is worth 10 points instead of 30",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "lead approval gate (rules variant) intake stores a valid lead as pending with a draft, scores it, and sends nothing",
+      "seconds": 14
+    },
+    {
+      "id": "gate-email-check-removed",
+      "workflow": "lead-approval-gate.json",
+      "change": "email format check removed from validation",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "lead approval gate (rules variant) intake rejects bad email with 400 and stores nothing",
+      "seconds": 15
+    },
+    {
+      "id": "gate-wrong-recipient",
+      "workflow": "lead-approval-gate.json",
+      "change": "email is sent to the lead's name field instead of the address",
+      "outcome": "killed",
+      "testsFailed": 5,
+      "firstFailingTest": "lead approval gate (rules variant) approval sends exactly once, with the stored draft, only after approval",
+      "seconds": 22
+    },
+    {
+      "id": "gate-failed-send-marked-sent",
+      "workflow": "lead-approval-gate.json",
+      "change": "a failed send is wired to \"Mark sent\"",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "lead approval gate (rules variant) approval records send_failed, answers 502 and allows a retry when the email provider fails",
+      "seconds": 14
+    },
+    {
+      "id": "llm-no-fallback",
+      "workflow": "lead-approval-gate-llm.json",
+      "change": "LLM request errors stop the workflow instead of falling back to the rules",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "lead approval gate: mock LLM variant falls back to the rules scorer when the LLM service is down (503)",
+      "seconds": 14
+    },
+    {
+      "id": "llm-score-range-unchecked",
+      "workflow": "lead-approval-gate-llm.json",
+      "change": "the 0-100 range check on the LLM score is removed",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "lead approval gate: mock LLM variant falls back to the rules scorer when the LLM returns a score outside 0-100",
+      "seconds": 14
+    },
+    {
+      "id": "signed-wrong-secret",
+      "workflow": "webhook-to-signed-api.json",
+      "change": "the request is signed with a different secret",
+      "outcome": "killed",
+      "testsFailed": 9,
+      "firstFailingTest": "webhook to signed API: the signed call signs the exact bytes it sends and the API accepts the signature",
+      "seconds": 15
+    },
+    {
+      "id": "signed-no-timestamp-in-signature",
+      "workflow": "webhook-to-signed-api.json",
+      "change": "the signature covers only the body, not timestamp.body",
+      "outcome": "killed",
+      "testsFailed": 9,
+      "firstFailingTest": "webhook to signed API: the signed call signs the exact bytes it sends and the API accepts the signature",
+      "seconds": 14
+    },
+    {
+      "id": "signed-body-differs-from-signed-bytes",
+      "workflow": "webhook-to-signed-api.json",
+      "change": "the body that is sent differs from the bytes that were signed (a space after the first comma)",
+      "outcome": "killed",
+      "testsFailed": 9,
+      "firstFailingTest": "webhook to signed API: the signed call signs the exact bytes it sends and the API accepts the signature",
+      "seconds": 14
+    },
+    {
+      "id": "signed-swap-branch-outputs",
+      "workflow": "webhook-to-signed-api.json",
+      "change": "swap the true/false outputs of \"Confident?\"",
+      "outcome": "killed",
+      "testsFailed": 8,
+      "firstFailingTest": "webhook to signed API: confidence branch high confidence goes straight to the callback and never touches the review queue",
+      "seconds": 14
+    },
+    {
+      "id": "signed-threshold-strict",
+      "workflow": "webhook-to-signed-api.json",
+      "change": "confidence >= 0.8 becomes > 0.8",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "webhook to signed API: confidence branch routes exactly on the 0.8 threshold",
+      "seconds": 16
+    },
+    {
+      "id": "signed-threshold-lowered",
+      "workflow": "webhook-to-signed-api.json",
+      "change": "threshold lowered from 0.8 to 0.5",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "webhook to signed API: confidence branch routes just below the threshold, 0.79",
+      "seconds": 13
+    },
+    {
+      "id": "signed-no-review-queue",
+      "workflow": "webhook-to-signed-api.json",
+      "change": "low confidence skips the review queue and goes straight to the callback",
+      "outcome": "killed",
+      "testsFailed": 3,
+      "firstFailingTest": "webhook to signed API: confidence branch low confidence goes to the review queue, then the callback says needs_review",
+      "seconds": 14
+    },
+    {
+      "id": "signed-no-callback-on-auto",
+      "workflow": "webhook-to-signed-api.json",
+      "change": "no callback for high-confidence events",
+      "outcome": "killed",
+      "testsFailed": 6,
+      "firstFailingTest": "webhook to signed API: the signed call signs the exact bytes it sends and the API accepts the signature",
+      "seconds": 104
+    },
+    {
+      "id": "signed-callback-allowlist-removed",
+      "workflow": "webhook-to-signed-api.json",
+      "change": "callback URL allow-list removed (any host is accepted)",
+      "outcome": "killed",
+      "testsFailed": 4,
+      "firstFailingTest": "webhook to signed API: failures and bad input answers 400 for a callback URL on another host name (localhost, not 127.0.0.1) and calls nothing downstream",
+      "seconds": 13
+    },
+    {
+      "id": "signed-no-failed-callback",
+      "workflow": "webhook-to-signed-api.json",
+      "change": "a rejected or failed API call is silently dropped (no failed callback)",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "webhook to signed API: failures and bad input when the signed API rejects the signature (401), the caller gets a 'failed' callback and nothing is queued",
+      "seconds": 43
+    },
+    {
+      "id": "retry-off",
+      "workflow": "retry-and-error-handling.json",
+      "change": "retry on fail switched off",
+      "outcome": "killed",
+      "testsFailed": 7,
+      "firstFailingTest": "retry on fail succeeds on the 3rd try after two 500s, waiting between tries",
+      "seconds": 15
+    },
+    {
+      "id": "retry-max-tries-2",
+      "workflow": "retry-and-error-handling.json",
+      "change": "max tries 3 -> 2 (the 3rd try never happens)",
+      "outcome": "killed",
+      "testsFailed": 5,
+      "firstFailingTest": "retry on fail succeeds on the 3rd try after two 500s, waiting between tries",
+      "seconds": 27
+    },
+    {
+      "id": "retry-no-wait",
+      "workflow": "retry-and-error-handling.json",
+      "change": "wait between tries set to 0 (n8n falls back to its 1000 ms default; caught by the stored-settings check)",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "error workflow wiring is linked in the workflow settings that n8n stored, and points at the handler workflow",
+      "seconds": 33
+    },
+    {
+      "id": "retry-short-wait",
+      "workflow": "retry-and-error-handling.json",
+      "change": "wait between tries cut from 1000 ms to 100 ms",
+      "outcome": "killed",
+      "testsFailed": 3,
+      "firstFailingTest": "retry on fail succeeds on the 3rd try after two 500s, waiting between tries",
+      "seconds": 23
+    },
+    {
+      "id": "retry-no-request-timeout",
+      "workflow": "retry-and-error-handling.json",
+      "change": "request timeout removed from the HTTP node",
+      "outcome": "killed",
+      "testsFailed": 3,
+      "firstFailingTest": "retry on fail gives up on a hanging API after the request timeout and succeeds on the 3rd try",
+      "seconds": 78
+    },
+    {
+      "id": "dedupe-removed",
+      "workflow": "retry-and-error-handling.json",
+      "change": "the dedupe check (\"First delivery?\") always passes",
+      "outcome": "killed",
+      "testsFailed": 4,
+      "firstFailingTest": "dedupe a second delivery of the same event id is not processed again",
+      "seconds": 31
+    },
+    {
+      "id": "dedupe-claim-never-done",
+      "workflow": "retry-and-error-handling.json",
+      "change": "a processed event stays \"processing\" in the claim table",
+      "outcome": "killed",
+      "testsFailed": 5,
+      "firstFailingTest": "retry on fail processes a healthy event on the first try",
+      "seconds": 31
+    },
+    {
+      "id": "error-workflow-unlinked",
+      "workflow": "retry-and-error-handling.json",
+      "change": "the Error Workflow link is removed from the workflow settings",
+      "outcome": "killed",
+      "testsFailed": 5,
+      "firstFailingTest": "permanent failure and the Error Workflow after 3 failed tries: releases the claim, answers 502, fails the execution, and the Error Workflow records an alert",
+      "seconds": 90
+    },
+    {
+      "id": "failure-keeps-claim",
+      "workflow": "retry-and-error-handling.json",
+      "change": "permanent failure does not release the claim",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "permanent failure and the Error Workflow after 3 failed tries: releases the claim, answers 502, fails the execution, and the Error Workflow records an alert",
+      "seconds": 30
+    },
+    {
+      "id": "failure-not-an-error",
+      "workflow": "retry-and-error-handling.json",
+      "change": "permanent failure no longer fails the execution (no \"Fail execution\")",
+      "outcome": "killed",
+      "testsFailed": 4,
+      "firstFailingTest": "permanent failure and the Error Workflow after 3 failed tries: releases the claim, answers 502, fails the execution, and the Error Workflow records an alert",
+      "seconds": 66
+    },
+    {
+      "id": "alert-wrong-endpoint",
+      "workflow": "error-handler.json",
+      "change": "the Error Workflow posts to the wrong alert URL",
+      "outcome": "killed",
+      "testsFailed": 3,
+      "firstFailingTest": "permanent failure and the Error Workflow after 3 failed tries: releases the claim, answers 502, fails the execution, and the Error Workflow records an alert",
+      "seconds": 47
+    },
+    {
+      "id": "alert-drops-event-id",
+      "workflow": "error-handler.json",
+      "change": "the alert no longer extracts the event id",
+      "outcome": "killed",
+      "testsFailed": 3,
+      "firstFailingTest": "permanent failure and the Error Workflow after 3 failed tries: releases the claim, answers 502, fails the execution, and the Error Workflow records an alert",
+      "seconds": 72
+    },
+    {
+      "id": "digest-empty-day-sends",
+      "workflow": "scheduled-digest.json",
+      "change": "the \"Anything to report?\" check always passes (empty day sends a mail)",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "scheduled digest: runs started through n8n empty day: reads the table, builds a digest of nothing and sends nothing",
+      "seconds": 16
+    },
+    {
+      "id": "digest-flip-if",
+      "workflow": "scheduled-digest.json",
+      "change": "flip the \"Anything to report?\" condition",
+      "outcome": "killed",
+      "testsFailed": 4,
+      "firstFailingTest": "scheduled digest: runs started through n8n empty day: reads the table, builds a digest of nothing and sends nothing",
+      "seconds": 49
+    },
+    {
+      "id": "digest-no-pagination",
+      "workflow": "scheduled-digest.json",
+      "change": "pagination removed (only the first 50 leads are read)",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "scheduled digest: runs started through n8n a busy day: reads every page, counts correctly, mails one digest",
+      "seconds": 17
+    },
+    {
+      "id": "digest-window-ten-days",
+      "workflow": "scheduled-digest.json",
+      "change": "the digest window is 240 hours instead of 24",
+      "outcome": "killed",
+      "testsFailed": 3,
+      "firstFailingTest": "scheduled digest: runs started through n8n empty day: reads the table, builds a digest of nothing and sends nothing",
+      "seconds": 16
+    },
+    {
+      "id": "digest-wrong-recipient",
+      "workflow": "scheduled-digest.json",
+      "change": "the digest goes to a different address",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "scheduled digest: runs started through n8n a busy day: reads every page, counts correctly, mails one digest",
+      "seconds": 18
+    },
+    {
+      "id": "digest-pending-count",
+      "workflow": "scheduled-digest.json",
+      "change": "\"awaiting approval\" counts the sent leads",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "scheduled digest: runs started through n8n a busy day: reads every page, counts correctly, mails one digest",
+      "seconds": 16
+    },
+    {
+      "id": "digest-top-list-ascending",
+      "workflow": "scheduled-digest.json",
+      "change": "the top-by-fit list is sorted ascending",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "scheduled digest: runs started through n8n a busy day: reads every page, counts correctly, mails one digest",
+      "seconds": 18
+    },
+    {
+      "id": "digest-error-workflow-unlinked",
+      "workflow": "scheduled-digest.json",
+      "change": "the Error Workflow link is removed from the digest workflow",
+      "outcome": "killed",
+      "testsFailed": 2,
+      "firstFailingTest": "scheduled digest: what is stored in n8n is active, runs at 08:00 in Asia/Kolkata, and is linked to the error workflow",
+      "seconds": 31
+    },
+    {
+      "id": "digest-schedule-changed",
+      "workflow": "scheduled-digest.json",
+      "change": "the schedule is 09:00 instead of 08:00",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "scheduled digest: what is stored in n8n is active, runs at 08:00 in Asia/Kolkata, and is linked to the error workflow",
+      "seconds": 18
+    },
+    {
+      "id": "digest-timezone-utc",
+      "workflow": "scheduled-digest.json",
+      "change": "the workflow time zone is UTC instead of Asia/Kolkata",
+      "outcome": "killed",
+      "testsFailed": 1,
+      "firstFailingTest": "scheduled digest: what is stored in n8n is active, runs at 08:00 in Asia/Kolkata, and is linked to the error workflow",
+      "seconds": 19
+    }
+  ]
+}
