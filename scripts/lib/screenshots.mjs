@@ -29,6 +29,22 @@ function playwrightChromePids() {
   }
 }
 
+// n8n opens a "Production Checklist" popover on published workflows; close it so it does not cover the canvas.
+async function dismissChecklist(page) {
+  const popover = page.getByText("Production Checklist", { exact: true });
+  if (!(await popover.isVisible().catch(() => false))) return;
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(500);
+  if (await popover.isVisible().catch(() => false)) {
+    const box = await popover.boundingBox();
+    // the close icon sits at the right-hand end of the popover's title row
+    if (box) await page.mouse.click(box.x + 320, box.y + box.height / 2);
+    await page.waitForTimeout(500);
+  }
+  if (await popover.isVisible().catch(() => false)) throw new Error("could not close the Production Checklist popover");
+  await page.waitForTimeout(500);
+}
+
 export async function takeScreenshots(stack, { outDir = path.join(ROOT, "evidence", "screenshots") } = {}) {
   const manifest = JSON.parse(fs.readFileSync(path.join(SCRATCH, "evidence-manifest.json"), "utf8"));
   fs.mkdirSync(outDir, { recursive: true });
@@ -47,6 +63,7 @@ export async function takeScreenshots(stack, { outDir = path.join(ROOT, "evidenc
       await page.goto(`${N8N_BASE}/workflow/${entry.workflowId}/executions/${entry.executionId}`, { waitUntil: "domcontentloaded" });
       await page.waitForSelector(".vue-flow__node, [data-test-id='canvas-node']", { timeout: 30_000 });
       await page.waitForTimeout(2500); // let the canvas fit and the run markers render
+      await dismissChecklist(page);
       const file = path.join(outDir, `${name}.png`);
       await page.screenshot({ path: file });
       taken.push(path.relative(ROOT, file));
