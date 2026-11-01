@@ -1,0 +1,30 @@
+{
+  "name": "n8n-lab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Workflows that run for real on a local n8n instance against local mock services",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build:workflows": "node scripts/build-workflows.mjs",
+    "check:workflows": "node scripts/build-workflows.mjs --check"
+  },
+  "dependencies": {
+    "n8n": "2.45.7"
+  },
+  "allowScripts": {
+    "sqlite3@5.1.7": true,
+    "@scarf/scarf": false,
+    "agent-browser": false,
+    "oracledb": false,
+    "@confluentinc/kafka-javascript": false
+  },
+  "devDependencies": {
+    "playwright-core": "1.64.1",
+    "vitest": "5.0.5"
+  }
+}
