@@ -211,6 +211,9 @@ export function sign(secret, timestamp, rawBody) {
 
 export function classify(text) {
   const t = String(text ?? "").toLowerCase();
+  // fixtures for the exact edge of the workflow's 0.8 threshold
+  if (t.includes("threshold-exact")) return { label: "boundary", confidence: 0.8 };
+  if (t.includes("threshold-below")) return { label: "boundary", confidence: 0.79 };
   if (t.includes("refund")) return { label: "refund_request", confidence: 0.95 };
   if (t.includes("invoice") || t.includes("billing")) return { label: "billing", confidence: 0.88 };
   if (t.includes("password") || t.includes("login")) return { label: "account_access", confidence: 0.84 };
