@@ -1,0 +1,45 @@
+// Renders recorded executions in the n8n editor with the locally installed Google Chrome
+// (Playwright, channel "chrome", headless) and saves PNGs. Needs a running stack.
+import fs from "node:fs";
+import path from "node:path";
+import { chromium } from "playwright-core";
+import { killTree } from "./proc.mjs";
+import { N8N_BASE, ROOT, SCRATCH } from "./stack.mjs";
+
+const WANTED = [
+  ["lead-gate-approve-sent", "Lead approval gate: approve webhook, lead sent once"],
+  ["retry-permanent-failure", "Retry and error handling: three failed tries, execution fails, Error Workflow fires"],
+  ["signed-api-low-confidence", "Signed API: low confidence goes to the review queue"],
+  ["digest-sent", "Scheduled digest: all pages read, digest mailed"],
+];
+
+export async function takeScreenshots(stack, { outDir = path.join(ROOT, "evidence", "screenshots") } = {}) {
+  const manifest = JSON.parse(fs.readFileSync(path.join(SCRATCH, "evidence-manifest.json"), "utf8"));
+  fs.mkdirSync(outDir, { recursive: true });
+  const cookie = stack.client.cookie ?? (await stack.client.login(stack.secrets));
+  const [cookieName, ...rest] = cookie.split(";")[0].split("=");
+  const browser = await chromium.launch({ channel: "chrome", headless: true });
+  const pid = browser.process()?.pid;
+  const taken = [];
+  try {
+    const context = await browser.newContext({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1 });
+    await context.addCookies([{ name: cookieName, value: rest.join("="), url: N8N_BASE }]);
+    for (const [name] of WANTED) {
+      const entry = manifest.find((m) => m.name === name);
+      if (!entry) continue;
+      const page = await context.newPage();
+      await page.goto(`${N8N_BASE}/workflow/${entry.workflowId}/executions/${entry.executionId}`, { waitUntil: "domcontentloaded" });
+      await page.waitForSelector(".vue-flow__node, [data-test-id='canvas-node']", { timeout: 30_000 });
+      await page.waitForTimeout(2500); // let the canvas fit and the run markers render
+      const file = path.join(outDir, `${name}.png`);
+      await page.screenshot({ path: file });
+      taken.push(path.relative(ROOT, file));
+      await page.close();
+    }
+  } finally {
+    await browser.close().catch(() => {});
+    if (pid) await killTree(pid, { graceMs: 1500 }).catch(() => {});
+  }
+  console.log(`screenshots: ${taken.join(", ") || "none"}`);
+  return taken;
+}

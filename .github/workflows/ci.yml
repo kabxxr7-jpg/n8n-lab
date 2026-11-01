@@ -1,0 +1,28 @@
+name: ci
+
+# NOTE: this workflow has not been run yet (the repository has no remote at the time of writing).
+# Everything in it is exercised locally, but treat the file itself as untested until it has run.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      # --ignore-scripts keeps unrelated dependency install scripts from running;
+      # sqlite3 is the one native module n8n needs, so it is rebuilt explicitly.
+      - run: npm ci --ignore-scripts
+      - run: npm rebuild sqlite3
+      - run: npm run check:workflows
+      - name: Tests against a real n8n (starts n8n on 5690 and mocks on 4700-4707)
+        run: npm test
+      - name: Mutation check self-test (planted hang must be killed, timeout is not a kill)
+        run: npm run mutation:selftest -- --selftest-quick

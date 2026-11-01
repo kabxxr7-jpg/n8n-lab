@@ -6,12 +6,19 @@
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "scripts": {
     "test": "vitest run",
     "build:workflows": "node scripts/build-workflows.mjs",
-    "check:workflows": "node scripts/build-workflows.mjs --check"
+    "check:workflows": "node scripts/build-workflows.mjs --check",
+    "mocks": "node mocks/start.mjs",
+    "n8n:start": "node scripts/n8n-start.mjs",
+    "mutation": "node scripts/mutation-check.mjs",
+    "mutation:selftest": "node scripts/mutation-check.mjs --selftest",
+    "evidence": "LAB_EVIDENCE_DIR=evidence/executions LAB_SCREENSHOTS=1 vitest run",
+    "hygiene": "node scripts/hygiene-check.mjs",
+    "verify:cli-import": "node scripts/verify-cli-import.mjs"
   },
   "dependencies": {
     "n8n": "2.45.7"

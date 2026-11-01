@@ -11,9 +11,11 @@ export default async function setup(project) {
     return async () => {};
   }
   await waitForLoad();
+  fs.rmSync(path.join(SCRATCH, "asserted-executions.jsonl"), { force: true });
   const stack = await startStack({ logFile: path.join(SCRATCH, "n8n-test.log") });
   project.provide("lab", contextOf(stack));
   return async () => {
+    summarizeAssertedExecutions();
     if (process.env.LAB_SCREENSHOTS) {
       const { takeScreenshots } = await import("../scripts/lib/screenshots.mjs");
       await takeScreenshots(stack).catch((e) => console.error("screenshots failed:", e.message));
@@ -31,5 +33,18 @@ export function contextOf(stack) {
     signingSecret: stack.secrets.signingSecret,
     ids: stack.ids,
     errorHandlerId: stack.errorHandlerId,
+    n8nPid: stack.n8n.pid,
   };
+}
+
+function summarizeAssertedExecutions() {
+  try {
+    const rows = fs.readFileSync(path.join(SCRATCH, "asserted-executions.jsonl"), "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
+    const unique = new Map(rows.map((r) => [r.id, r]));
+    const by = {};
+    for (const r of unique.values()) by[r.status] = (by[r.status] ?? 0) + 1;
+    const summary = { executionsAsserted: unique.size, byStatus: by };
+    fs.writeFileSync(path.join(SCRATCH, "last-run-summary.json"), JSON.stringify(summary, null, 2));
+    console.log(`n8n executions asserted on: ${unique.size} unique (${JSON.stringify(by)})`);
+  } catch {}
 }

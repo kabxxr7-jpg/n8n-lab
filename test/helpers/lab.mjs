@@ -75,6 +75,15 @@ export function mock(name) {
 
 const FINISHED = new Set(["success", "error", "crashed", "canceled"]);
 
+/** Remember which executions the tests looked into (counted in the run summary). */
+export function noteAsserted(...execs) {
+  try {
+    fs.mkdirSync(SCRATCH, { recursive: true });
+    const lines = execs.flat().map((e) => JSON.stringify({ id: String(e.id), workflowId: e.workflowId, mode: e.mode, status: e.status }));
+    if (lines.length) fs.appendFileSync(path.join(SCRATCH, "asserted-executions.jsonl"), lines.join("\n") + "\n");
+  } catch {}
+}
+
 export async function listExecutions(wfId, { limit = 100 } = {}) {
   const res = await client().api(`/executions?workflowId=${wfId}&includeData=true&limit=${limit}`);
   if (res.status !== 200) throw new Error(`executions list failed: HTTP ${res.status}`);
@@ -84,6 +93,7 @@ export async function listExecutions(wfId, { limit = 100 } = {}) {
 export async function getExecution(id) {
   const res = await client().api(`/executions/${id}?includeData=true`);
   if (res.status !== 200) throw new Error(`execution ${id}: HTTP ${res.status}`);
+  noteAsserted(res.body);
   return res.body;
 }
 
@@ -117,6 +127,7 @@ export async function findExecution(wfId, { trigger, match, timeoutMs = 20_000, 
     },
     { timeoutMs, intervalMs: 250, what: `an execution of ${wfId} matching your predicate` },
   );
+  noteAsserted(found);
   return found;
 }
 
