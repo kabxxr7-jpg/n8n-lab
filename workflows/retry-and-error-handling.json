@@ -1,0 +1,414 @@
+{
+  "name": "Retry, dedupe and error handling",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "events",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "5c37925b-9209-4d2f-ac18-c0f88e8bef4d",
+      "name": "Webhook: event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "4e0db2c3-d5d0-4c58-a5e2-384322bad3f4"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Validate the inbound event for the retry/dedupe workflow.\nconst body = $input.first().json.body;\nconst errors = [];\nif (body === null || typeof body !== 'object' || Array.isArray(body)) {\n  return [{ json: { valid: false, errors: ['body must be a JSON object'] } }];\n}\nconst event_id = typeof body.event_id === 'string' ? body.event_id : '';\nconst type = typeof body.type === 'string' ? body.type.trim() : '';\nconst data = body.data !== null && typeof body.data === 'object' && !Array.isArray(body.data) ? body.data : null;\n\nif (!/^[A-Za-z0-9_-]{1,64}$/.test(event_id)) errors.push('event_id must be 1-64 characters of A-Z a-z 0-9 _ -');\nif (type.length < 1 || type.length > 60) errors.push('type must be 1-60 characters');\nif (data === null) errors.push('data must be a JSON object');\nif (errors.length) return [{ json: { valid: false, errors } }];\nreturn [{ json: { valid: true, errors: [], event_id, type, data } }];"
+      },
+      "id": "cbb6d200-96c2-4123-a265-0125b1727f6d",
+      "name": "Validate event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        250,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d994bf6e-8705-4d3d-aaf4-a547ac442ce4",
+              "leftValue": "={{ $json.valid === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4c7c2e3a-6dd9-45ee-a75d-f42995dc1727",
+      "name": "Event valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error: 'invalid_event', details: $json.errors } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "5e5a458b-1d1a-4fca-a3ec-19d7c5255fc2",
+      "name": "Respond 400 invalid event",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        500,
+        170
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4700/tables/event_claims/rows",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { id: $json.event_id, type: $json.type, status: 'processing' } }}",
+        "options": {
+          "timeout": 5000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "37cad700-7aa1-449b-a3ad-d689e7dd52ed",
+      "name": "Claim event id",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        750,
+        0
+      ],
+      "notes": "Atomic insert on a unique key. 201 = first delivery. 409 = seen before: done -> 200 duplicate, still processing -> 409 in_progress."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cccfdfac-c440-4bbe-a58e-3fc134a36211",
+              "leftValue": "={{ $json.statusCode === 201 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "813e8f66-7e56-4fcb-ae63-dcff9efcec50",
+      "name": "First delivery?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.statusCode !== 409 ? { error: 'claim_store_unavailable' } : { status: $json.body.existing_status === 'done' ? 'duplicate' : 'in_progress', event_id: $('Validate event').first().json.event_id } }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode !== 409 ? 503 : $json.body.existing_status === 'done' ? 200 : 409 }}"
+        }
+      },
+      "id": "abdab11e-cf79-4852-a2c3-4793e8e3af47",
+      "name": "Respond duplicate",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1000,
+        170
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4705/v1/process",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { event_id: $('Validate event').first().json.event_id, type: $('Validate event').first().json.type, data: $('Validate event').first().json.data } }}",
+        "options": {
+          "timeout": 1500
+        }
+      },
+      "id": "da43e61f-0fdd-4d33-a903-9f0e4a5dbb24",
+      "name": "Call flaky API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1250,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'http://127.0.0.1:4700/tables/event_claims/rows/' + $('Validate event').first().json.event_id }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { status: 'done' } }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "6cd4738f-7d4f-4251-a03c-c8ccf1cc59be",
+      "name": "Mark claim done",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'processed', event_id: $json.id } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "841aefdd-d793-43ee-a382-4fb86eb98983",
+      "name": "Respond 200 processed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1750,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "={{ 'http://127.0.0.1:4700/tables/event_claims/rows/' + $('Validate event').first().json.event_id }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "445a53a3-bf32-4172-a18b-db2389430e91",
+      "name": "Release claim",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1500,
+        170
+      ],
+      "notes": "Without this a failed event would be treated as a duplicate when the sender redelivers it."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'failed', event_id: $('Validate event').first().json.event_id } }}",
+        "options": {
+          "responseCode": 502
+        }
+      },
+      "id": "615447a7-cd10-4f31-a9b5-40d39f85877c",
+      "name": "Respond 502 failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1750,
+        170
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Event {{ $('Validate event').first().json.event_id }} failed after retries: {{ $('Call flaky API').first().json.error ? $('Call flaky API').first().json.error.message : 'upstream error' }}"
+      },
+      "id": "7d5d042c-7d65-4421-af51-d9e7a5ef418b",
+      "name": "Fail execution",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        170
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook: event": {
+      "main": [
+        [
+          {
+            "node": "Validate event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate event": {
+      "main": [
+        [
+          {
+            "node": "Event valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event valid?": {
+      "main": [
+        [
+          {
+            "node": "Claim event id",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 400 invalid event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim event id": {
+      "main": [
+        [
+          {
+            "node": "First delivery?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "First delivery?": {
+      "main": [
+        [
+          {
+            "node": "Call flaky API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call flaky API": {
+      "main": [
+        [
+          {
+            "node": "Mark claim done",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Release claim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark claim done": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Release claim": {
+      "main": [
+        [
+          {
+            "node": "Respond 502 failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond 502 failed": {
+      "main": [
+        [
+          {
+            "node": "Fail execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "errorWorkflow": "labErrorHandler01"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "n8n-lab"
+  },
+  "active": false
+}

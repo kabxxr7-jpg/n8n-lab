@@ -1,0 +1,397 @@
+{
+  "name": "Webhook to signed API with confidence branch",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "signed-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "19634a27-4a71-443b-a6ba-cac6998e694d",
+      "name": "Webhook: event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "816f3ce1-7025-4762-a90c-288a832d622f"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Validate the inbound event and the callback URL (allow-list: no SSRF to arbitrary hosts).\nconst ALLOWED_CALLBACK_PREFIX = 'http://127.0.0.1:4704/';\nconst body = $input.first().json.body;\nconst errors = [];\n\nif (body === null || typeof body !== 'object' || Array.isArray(body)) {\n  return [{ json: { valid: false, errors: ['body must be a JSON object'] } }];\n}\nconst event_id = typeof body.event_id === 'string' ? body.event_id : '';\nconst text = typeof body.text === 'string' ? body.text.trim() : '';\nconst callback_url = typeof body.callback_url === 'string' ? body.callback_url : '';\n\nif (!/^[A-Za-z0-9_-]{1,64}$/.test(event_id)) errors.push('event_id must be 1-64 characters of A-Z a-z 0-9 _ -');\nif (text.length < 1 || text.length > 2000) errors.push('text must be 1-2000 characters');\nif (!callback_url.startsWith(ALLOWED_CALLBACK_PREFIX) || callback_url.length > 300) {\n  errors.push(`callback_url must start with ${ALLOWED_CALLBACK_PREFIX}`);\n}\nif (errors.length) return [{ json: { valid: false, errors } }];\nreturn [{ json: { valid: true, errors: [], event: { event_id, text, callback_url } } }];"
+      },
+      "id": "a4261a7f-07b2-46c4-ac15-7bcb2d86f4d5",
+      "name": "Validate event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        250,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9d072e03-8db4-4ac0-a50a-2193cdf62f22",
+              "leftValue": "={{ $json.valid === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "18c905d9-5b5e-427f-a2a6-358b0c67e698",
+      "name": "Event valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error: 'invalid_event', details: $json.errors } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "688f7f5e-244b-49f1-addd-6fe16a7f24e7",
+      "name": "Respond 400 invalid event",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        500,
+        170
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { accepted: true, event_id: $json.event.event_id } }}",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "id": "42e53e2c-5f0b-4182-ac1d-c30e2f9c3bfd",
+      "name": "Respond 202 accepted",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        750,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Sign the outbound request: HMAC-SHA256 over \"<unix seconds>.<exact body string>\".\n// The same body string is sent as the raw request body, so the bytes match.\nconst crypto = require('crypto');\nconst { event } = $input.first().json;\nconst secret = $env.LAB_SIGNING_SECRET;\nif (!secret) throw new Error('LAB_SIGNING_SECRET is not set');\n\nconst bodyString = JSON.stringify({ event_id: event.event_id, text: event.text });\nconst timestamp = String(Math.floor(Date.now() / 1000));\nconst signature =\n  'sha256=' + crypto.createHmac('sha256', secret).update(`${timestamp}.${bodyString}`).digest('hex');\n\nreturn [{ json: { event, bodyString, timestamp, signature } }];"
+      },
+      "id": "4101d1c9-e237-4105-a24c-c3f009875243",
+      "name": "Sign request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        0
+      ],
+      "notes": "HMAC-SHA256 over '<unix seconds>.<body>' using LAB_SIGNING_SECRET from the environment."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4703/v1/classify",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Lab-Timestamp",
+              "value": "={{ $json.timestamp }}"
+            },
+            {
+              "name": "X-Lab-Signature",
+              "value": "={{ $json.signature }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.bodyString }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "fdf3af61-8ca9-4080-a554-b1532cc50b33",
+      "name": "Call signed API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1250,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8fe06464-9fef-46fd-a02f-09787f8b7df7",
+              "leftValue": "={{ Number($json.confidence) >= 0.8 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "54ecf0c1-7d6f-4f7a-a14c-57c536769f4f",
+      "name": "Confident?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Validate event').first().json.event.callback_url }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { event_id: $json.event_id, status: 'auto_processed', label: $json.label, confidence: $json.confidence } }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "3c6ea96e-0ac4-4db9-a8ca-a2aaf6f5c73e",
+      "name": "Callback: auto processed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1750,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4700/tables/review_queue/rows",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { event_id: $('Validate event').first().json.event.event_id, label: $json.label, confidence: $json.confidence, text: $('Validate event').first().json.event.text, reason: 'low_confidence', status: 'open' } }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "5fbf4471-5af7-47a2-a910-db1103005d79",
+      "name": "Add to review queue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1750,
+        170
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Validate event').first().json.event.callback_url }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { event_id: $('Validate event').first().json.event.event_id, status: 'needs_review', review_id: $json.id, label: $json.label, confidence: $json.confidence } }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "4f49129d-ef2b-4fd7-ac33-f7f8a8266459",
+      "name": "Callback: needs review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2000,
+        170
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Validate event').first().json.event.callback_url }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { event_id: $('Validate event').first().json.event.event_id, status: 'failed', reason: 'classifier_error' } }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "5b2155e7-50f7-4e17-afd5-104c7a64f0c9",
+      "name": "Callback: failed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1500,
+        340
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook: event": {
+      "main": [
+        [
+          {
+            "node": "Validate event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate event": {
+      "main": [
+        [
+          {
+            "node": "Event valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event valid?": {
+      "main": [
+        [
+          {
+            "node": "Respond 202 accepted",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 400 invalid event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond 202 accepted": {
+      "main": [
+        [
+          {
+            "node": "Sign request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign request": {
+      "main": [
+        [
+          {
+            "node": "Call signed API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call signed API": {
+      "main": [
+        [
+          {
+            "node": "Confident?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Callback: failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confident?": {
+      "main": [
+        [
+          {
+            "node": "Callback: auto processed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add to review queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to review queue": {
+      "main": [
+        [
+          {
+            "node": "Callback: needs review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "n8n-lab"
+  },
+  "active": false
+}

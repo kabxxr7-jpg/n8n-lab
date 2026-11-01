@@ -1,0 +1,92 @@
+{
+  "id": "labErrorHandler01",
+  "name": "Error handler: record failure to alerts",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "4c2ad0e3-97d5-4cba-aa05-35092fce5b1b",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Turn the Error Trigger payload into an alert for the on-call channel.\nconst e = $input.first().json;\nconst message = String((e.execution && e.execution.error && e.execution.error.message) || 'unknown error');\nconst m = message.match(/Event ([A-Za-z0-9_-]{1,64}) failed/);\nreturn [{\n  json: {\n    severity: 'error',\n    workflow: e.workflow ? e.workflow.name : null,\n    workflow_id: e.workflow ? e.workflow.id : null,\n    execution_id: e.execution ? e.execution.id : null,\n    failed_node: e.execution ? e.execution.lastNodeExecuted : null,\n    event_id: m ? m[1] : null,\n    message: message.slice(0, 500),\n    occurred_at: new Date().toISOString(),\n  },\n}];"
+      },
+      "id": "0d4d6111-8494-4270-af11-453af7913756",
+      "name": "Format alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        250,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4706/alerts",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "a6c86b53-9109-4d4c-a6e3-7cb5047b29b1",
+      "name": "Post alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        500,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 500
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format alert": {
+      "main": [
+        [
+          {
+            "node": "Post alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "n8n-lab"
+  },
+  "active": false
+}

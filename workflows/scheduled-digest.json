@@ -1,0 +1,247 @@
+{
+  "name": "Scheduled lead digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "8e9f6571-78d7-483f-ab40-2a12a5e2fccf",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "notes": "08:00 every day in the workflow time zone (Asia/Kolkata)."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// The digest covers the last 24 hours.\nconst WINDOW_HOURS = 24;\nconst until = new Date();\nconst since = new Date(until.getTime() - WINDOW_HOURS * 3600 * 1000);\nreturn [{ json: { since: since.toISOString(), until: until.toISOString(), window_hours: WINDOW_HOURS } }];"
+      },
+      "id": "bb0b6ff2-2797-4392-a417-bf031d9cde31",
+      "name": "Compute window",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        250,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:4700/tables/leads/rows",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "created_after",
+              "value": "={{ $json.since }}"
+            },
+            {
+              "name": "page_size",
+              "value": "50"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 8000,
+          "pagination": {
+            "pagination": {
+              "paginationMode": "updateAParameterInEachRequest",
+              "parameters": {
+                "parameters": [
+                  {
+                    "type": "qs",
+                    "name": "page",
+                    "value": "={{ $pageCount + 1 }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.has_more === false }}",
+              "limitPagesFetched": true,
+              "maxRequests": 50
+            }
+          }
+        }
+      },
+      "id": "64c8fe20-7ee9-469b-a810-b7eb44497a03",
+      "name": "Fetch leads (all pages)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Flatten every page of rows and build the digest text. Sends nothing itself.\nconst DIGEST_TO = 'leads-digest@n8n-lab.test';\nconst rows = $input.all().flatMap((item) => (Array.isArray(item.json.rows) ? item.json.rows : []));\nconst win = $('Compute window').first().json;\n\nconst by_status = {};\nfor (const r of rows) by_status[r.status] = (by_status[r.status] || 0) + 1;\nconst total = rows.length;\nconst pending = by_status.pending || 0;\n\nconst top = [...rows]\n  .sort((a, b) => (b.fit_score || 0) - (a.fit_score || 0) || (a.id < b.id ? -1 : 1))\n  .slice(0, 5);\nconst day = win.until.slice(0, 10);\n\nconst lines = [\n  `Leads created in the last ${win.window_hours} hours: ${total}`,\n  `By status: ${Object.entries(by_status).sort().map(([k, v]) => `${k} ${v}`).join(', ') || 'none'}`,\n  `Awaiting approval: ${pending}`,\n  '',\n  'Top by fit score:',\n  ...top.map((r) => `- ${r.id} | ${r.name} (${r.company}) | fit ${r.fit_score} ${r.tier} | ${r.status}`),\n];\n\nreturn [{\n  json: {\n    total, pending, by_status, to: DIGEST_TO,\n    subject: `Lead digest ${day}: ${total} new, ${pending} awaiting approval`,\n    body: lines.join('\\n'),\n  },\n}];"
+      },
+      "id": "ed96b10d-b62b-4b84-a42a-2df9175374b8",
+      "name": "Build digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        750,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f936dd3e-8420-49b7-a1cc-ca83fc1cc10a",
+              "leftValue": "={{ $json.total > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3df0f73f-896e-451f-a862-7dadaf727b5a",
+      "name": "Anything to report?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1000,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4707/outbox",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { to: $json.to, subject: $json.subject, body: $json.body } }}",
+        "options": {
+          "timeout": 8000
+        }
+      },
+      "id": "91814b34-7cac-4ffe-a750-9a017c730803",
+      "name": "Send digest",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1250,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "620c874d-143d-4599-a485-d659e093b873",
+      "name": "Empty day: send nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        170
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Compute window",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute window": {
+      "main": [
+        [
+          {
+            "node": "Fetch leads (all pages)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch leads (all pages)": {
+      "main": [
+        [
+          {
+            "node": "Build digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build digest": {
+      "main": [
+        [
+          {
+            "node": "Anything to report?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything to report?": {
+      "main": [
+        [
+          {
+            "node": "Send digest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Empty day: send nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "errorWorkflow": "labErrorHandler01"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "n8n-lab"
+  },
+  "active": false
+}

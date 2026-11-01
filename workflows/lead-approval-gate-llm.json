@@ -1,0 +1,767 @@
+{
+  "name": "Lead approval gate (mock LLM scorer)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-intake-llm",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "66e79cb7-d580-4534-a1ff-4773289b1c38",
+      "name": "Webhook: lead intake",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "34624f87-c294-4c86-a64d-05bc9f39774a"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Validate and normalise the lead posted to the intake webhook.\nconst body = $input.first().json.body;\nconst errors = [];\n\nif (body === null || typeof body !== 'object' || Array.isArray(body)) {\n  return [{ json: { valid: false, errors: ['body must be a JSON object'] } }];\n}\n\nconst str = (v) => (typeof v === 'string' ? v.trim() : '');\nconst name = str(body.name);\nconst email = str(body.email).toLowerCase();\nconst company = str(body.company);\nconst title = str(body.title);\nconst message = str(body.message);\n\nif (name.length < 2 || name.length > 100) errors.push('name must be 2-100 characters');\nif (email.length > 254 || !/^[^\\s@<>,;:\"']+@[^\\s@<>,;:\"']+\\.[a-z]{2,}$/i.test(email)) {\n  errors.push('email is not a valid address');\n}\nif (company.length < 1 || company.length > 120) errors.push('company must be 1-120 characters');\nif (title.length > 100) errors.push('title must be at most 100 characters');\nif (message.length > 2000) errors.push('message must be at most 2000 characters');\nif (/[\\r\\n]/.test(name + company + title)) errors.push('no line breaks allowed in name, company or title');\n\nconst optionalNumber = (value, field, { integer, min, max }) => {\n  if (value === undefined || value === null || value === '') return null;\n  const n = Number(value);\n  if (!Number.isFinite(n) || (integer && !Number.isInteger(n)) || n < min || n > max) {\n    errors.push(`${field} must be ${integer ? 'an integer' : 'a number'} between ${min} and ${max}`);\n    return null;\n  }\n  return n;\n};\nconst employees = optionalNumber(body.employees, 'employees', { integer: true, min: 1, max: 1000000 });\nconst budget_usd = optionalNumber(body.budget_usd, 'budget_usd', { integer: false, min: 0, max: 10000000 });\n\nif (errors.length) return [{ json: { valid: false, errors } }];\nreturn [{ json: { valid: true, errors: [], lead: { name, email, company, title, employees, budget_usd, message } } }];"
+      },
+      "id": "9a8102dd-899a-4bb6-a6b3-110a9a9019a3",
+      "name": "Validate lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        250,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4454eded-72fd-429d-a924-0f012b475854",
+              "leftValue": "={{ $json.valid === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3b78c60d-3aa8-41ca-ab87-9bb1855ebcc1",
+      "name": "Lead valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error: 'invalid_lead', details: $json.errors } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "e7526f1f-2558-4dcb-ad34-384b7f6cf858",
+      "name": "Respond 400 invalid lead",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        750,
+        -170
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4702/v1/chat/completions",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: 'mock-fit-1', response_format: { type: 'json_object' }, messages: [ { role: 'system', content: 'You qualify inbound B2B leads for a workflow automation consultancy. Reply with one JSON object with the keys fit_score (integer 0-100), rationale (string), draft_subject (string) and draft_body (string). Reply with nothing else.' }, { role: 'user', content: JSON.stringify($json.lead) } ] } }}",
+        "options": {
+          "timeout": 8000
+        }
+      },
+      "id": "ae5525b4-293c-4e3b-a597-2ce8963effde",
+      "name": "Ask LLM (mock)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        750,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Deterministic rule-based fit score (0-100). Pure function, no I/O.\nfunction scoreLeadRules(lead) {\n  let score = 0;\n  const reasons = [];\n  const add = (points, why) => {\n    score += points;\n    reasons.push(`${why} (${points >= 0 ? '+' : ''}${points})`);\n  };\n\n  const e = lead.employees;\n  if (e !== null && e !== undefined) {\n    if (e >= 11 && e <= 200) add(25, 'company size 11-200');\n    else if (e >= 201 && e <= 1000) add(20, 'company size 201-1000');\n    else if (e > 1000) add(15, 'company size over 1000');\n    else add(10, 'company size 1-10');\n  }\n\n  const title = String(lead.title || '');\n  if (/\\b(founder|owner|ceo|cto|coo|chief|head|vp|vice president|director)\\b/i.test(title)) {\n    add(25, 'senior title');\n  } else if (/\\b(manager|lead|principal)\\b/i.test(title)) {\n    add(10, 'manager-level title');\n  }\n\n  const budget = Number(lead.budget_usd || 0);\n  if (budget >= 5000) add(30, 'budget at least 5000 USD');\n  else if (budget >= 1000) add(15, 'budget at least 1000 USD');\n\n  const message = String(lead.message || '').toLowerCase();\n  const keywords = ['automation', 'n8n', 'workflow', 'integration', 'crm', 'api', 'webhook'];\n  const found = keywords.filter((k) => message.includes(k));\n  if (found.length) add(Math.min(found.length, 3) * 5, `mentions ${found.slice(0, 3).join(', ')}`);\n\n  if (/@(gmail|yahoo|outlook|hotmail|proton|protonmail)\\./i.test(String(lead.email || ''))) {\n    add(-10, 'free-mail address');\n  }\n\n  score = Math.max(0, Math.min(100, score));\n  const tier = score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low';\n  return { fit_score: score, tier, reasons };\n}\n// Take the LLM answer if it is well-formed; otherwise fall back to the rules.\nconst { lead } = $('Validate lead').first().json;\nconst clean = (s) => String(s).replace(/[\\r\\n\\t]+/g, ' ').trim();\nconst response = $input.first().json;\n\nlet parsed = null;\nlet failure = null;\nif (response.error) {\n  failure = `llm_request_failed: ${clean(response.error.message || response.error).slice(0, 120)}`;\n} else {\n  try {\n    const content = response.choices[0].message.content;\n    parsed = JSON.parse(content);\n  } catch (e) {\n    failure = 'llm_answer_not_json';\n  }\n}\nif (parsed) {\n  const okScore = typeof parsed.fit_score === 'number' && parsed.fit_score >= 0 && parsed.fit_score <= 100;\n  const okDraft =\n    typeof parsed.draft_subject === 'string' && parsed.draft_subject.trim().length > 0 &&\n    typeof parsed.draft_body === 'string' && parsed.draft_body.trim().length > 0;\n  if (!okScore) failure = 'llm_score_out_of_range';\n  else if (!okDraft) failure = 'llm_draft_missing';\n}\n\nif (failure) {\n  const rules = scoreLeadRules(lead);\n  const first = clean(lead.name).split(/\\s+/)[0];\n  return [{\n    json: {\n      lead, ...rules, scored_by: 'rules-fallback', fallback_reason: failure,\n      draft_subject: clean(`Re: your enquiry from ${lead.company}`).slice(0, 150),\n      draft_body: `Hi ${first},\\n\\nThanks for getting in touch. Would a 20 minute call this week suit you?\\n\\nBest regards`,\n    },\n  }];\n}\n\nconst score = Math.round(parsed.fit_score);\nconst tier = score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low';\nreturn [{\n  json: {\n    lead, fit_score: score, tier,\n    reasons: [clean(parsed.rationale || 'no rationale').slice(0, 300)],\n    scored_by: 'llm',\n    draft_subject: clean(parsed.draft_subject).slice(0, 150),\n    draft_body: String(parsed.draft_body).slice(0, 4000),\n  },\n}];"
+      },
+      "id": "5340ffd3-fd3b-4763-a09c-c0e88b55506f",
+      "name": "Parse LLM answer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        0
+      ],
+      "notes": "Takes the LLM answer only if it is valid JSON with a score in 0-100 and a draft; otherwise falls back to the rules scorer and says so in scored_by."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4700/tables/leads/rows",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { name: $json.lead.name, email: $json.lead.email, company: $json.lead.company, title: $json.lead.title, employees: $json.lead.employees, budget_usd: $json.lead.budget_usd, message: $json.lead.message, fit_score: $json.fit_score, tier: $json.tier, reasons: $json.reasons, scored_by: $json.scored_by, fallback_reason: $json.fallback_reason || null, draft_subject: $json.draft_subject, draft_body: $json.draft_body, status: 'pending' } }}",
+        "options": {
+          "timeout": 8000
+        }
+      },
+      "id": "9ab30b21-0f31-4eb0-adc4-16776c2d9060",
+      "name": "Write lead (pending)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1250,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { lead_id: $json.id, status: $json.status, fit_score: $json.fit_score, tier: $json.tier, scored_by: $json.scored_by } }}",
+        "options": {
+          "responseCode": 201
+        }
+      },
+      "id": "40f16107-9920-4647-a2c3-caf57c37cdf8",
+      "name": "Respond 201 lead pending",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1500,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error: 'storage_unavailable' } }}",
+        "options": {
+          "responseCode": 502
+        }
+      },
+      "id": "da89162f-c711-4e11-a85e-5e282d77d482",
+      "name": "Respond 502 storage unavailable",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1500,
+        170
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-approve-llm",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "536c75b2-3b69-46ba-a0c9-fbea02081a69",
+      "name": "Webhook: approve",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        510
+      ],
+      "webhookId": "3d75e906-1857-4bb2-ad3e-20f151117c72"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Validate the body of POST /lead-approve.\nconst body = $input.first().json.body;\nconst errors = [];\nif (body === null || typeof body !== 'object' || Array.isArray(body)) {\n  return [{ json: { valid: false, errors: ['body must be a JSON object'] } }];\n}\nconst lead_id = typeof body.lead_id === 'string' ? body.lead_id.trim() : '';\nconst approved_by = typeof body.approved_by === 'string' ? body.approved_by.trim() : '';\nif (!/^lead_[0-9]{1,12}$/.test(lead_id)) errors.push('lead_id must look like lead_123');\nif (approved_by.length < 2 || approved_by.length > 80) errors.push('approved_by must be 2-80 characters');\nif (errors.length) return [{ json: { valid: false, errors } }];\nreturn [{ json: { valid: true, errors: [], lead_id, approved_by } }];"
+      },
+      "id": "8c63afe6-db23-47e9-af93-9787de9a37ab",
+      "name": "Validate approval",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        250,
+        510
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cc9deb8b-2052-4f45-ac35-99c3f63d3048",
+              "leftValue": "={{ $json.valid === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fbd3272e-5127-4004-a906-49b577cff2c0",
+      "name": "Approval valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        500,
+        510
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error: 'invalid_approval', details: $json.errors } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "737878d9-fa69-44fc-a085-2804b0e64aab",
+      "name": "Respond 400 invalid approval",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        500,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'http://127.0.0.1:4700/tables/leads/rows/' + $json.lead_id }}",
+        "options": {
+          "timeout": 8000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "f9cefa2a-02dd-4410-a5e2-980b426c4a2c",
+      "name": "Get lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        750,
+        510
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "667045aa-3802-4144-a897-19f64c2d44c4",
+              "leftValue": "={{ $json.statusCode === 200 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "86868050-b09f-46f4-a087-0562f64d180a",
+      "name": "Lead found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1000,
+        510
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.statusCode === 404 ? { error: 'lead_not_found', lead_id: $('Validate approval').first().json.lead_id } : { error: 'storage_unavailable' } }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode === 404 ? 404 : 502 }}"
+        }
+      },
+      "id": "9868c950-8b7a-47b2-a5ce-f571d972a67f",
+      "name": "Respond lookup failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1000,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'http://127.0.0.1:4700/tables/leads/rows/' + $('Validate approval').first().json.lead_id }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "if_status",
+              "value": "pending,send_failed"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { status: 'sending', approved_by: $('Validate approval').first().json.approved_by, approved_at: $now.toISO() } }}",
+        "options": {
+          "timeout": 8000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "7c03f130-97e4-460a-a526-f03c1b844558",
+      "name": "Claim for sending",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1250,
+        510
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0a6579f1-27f6-4b2c-a7c8-344d88230b73",
+              "leftValue": "={{ $json.statusCode === 200 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e037f9b6-9e8c-4412-a03a-55af89cc72f6",
+      "name": "Claim won?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1500,
+        510
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.statusCode === 409 ? { error: 'already_processed', lead_id: $('Validate approval').first().json.lead_id, status: $json.body.current_status } : { error: 'storage_unavailable' } }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode === 409 ? 409 : 502 }}"
+        }
+      },
+      "id": "8c6dbcad-63cf-4eb8-a13b-b9e69aae77c7",
+      "name": "Respond not claimed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1500,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4701/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "={{ $json.body.id }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { to: $json.body.email, subject: $json.body.draft_subject, body: $json.body.draft_body, lead_id: $json.body.id } }}",
+        "options": {
+          "timeout": 8000
+        }
+      },
+      "id": "e558bdf5-d65c-4d8a-a657-9a6d99f888fb",
+      "name": "Send email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1750,
+        510
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'http://127.0.0.1:4700/tables/leads/rows/' + $('Validate approval').first().json.lead_id }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { status: 'sent', message_id: $json.message_id, sent_at: $now.toISO() } }}",
+        "options": {
+          "timeout": 8000
+        }
+      },
+      "id": "fe86b1b7-110c-43ec-a64c-748727f6a178",
+      "name": "Mark sent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2000,
+        510
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { lead_id: $json.id, status: $json.status, message_id: $json.message_id } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "d21ccd55-1c62-4deb-ad38-8fab680490c1",
+      "name": "Respond 200 sent",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2250,
+        510
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'http://127.0.0.1:4700/tables/leads/rows/' + $('Validate approval').first().json.lead_id }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { status: 'send_failed', send_error: String(($json.error && $json.error.message) || 'send failed').slice(0, 200) } }}",
+        "options": {
+          "timeout": 8000
+        }
+      },
+      "id": "15a9b0ef-d45b-4a5d-a4c9-e796f143e745",
+      "name": "Mark send_failed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2000,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error: 'send_failed', lead_id: $json.id, status: $json.status } }}",
+        "options": {
+          "responseCode": 502
+        }
+      },
+      "id": "8437e632-f5b7-4b85-a1e2-cba7af499c76",
+      "name": "Respond 502 send failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2250,
+        680
+      ]
+    }
+  ],
+  "connections": {
+    "Lead valid?": {
+      "main": [
+        [
+          {
+            "node": "Ask LLM (mock)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 400 invalid lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask LLM (mock)": {
+      "main": [
+        [
+          {
+            "node": "Parse LLM answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse LLM answer": {
+      "main": [
+        [
+          {
+            "node": "Write lead (pending)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write lead (pending)": {
+      "main": [
+        [
+          {
+            "node": "Respond 201 lead pending",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 502 storage unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: approve": {
+      "main": [
+        [
+          {
+            "node": "Validate approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate approval": {
+      "main": [
+        [
+          {
+            "node": "Approval valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approval valid?": {
+      "main": [
+        [
+          {
+            "node": "Get lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 400 invalid approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get lead": {
+      "main": [
+        [
+          {
+            "node": "Lead found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead found?": {
+      "main": [
+        [
+          {
+            "node": "Claim for sending",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond lookup failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim for sending": {
+      "main": [
+        [
+          {
+            "node": "Claim won?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claim won?": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond not claimed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        [
+          {
+            "node": "Mark sent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark send_failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark sent": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark send_failed": {
+      "main": [
+        [
+          {
+            "node": "Respond 502 send failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: lead intake": {
+      "main": [
+        [
+          {
+            "node": "Validate lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate lead": {
+      "main": [
+        [
+          {
+            "node": "Lead valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "n8n-lab"
+  },
+  "active": false
+}
