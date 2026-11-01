@@ -1,5 +1,6 @@
 // Renders recorded executions in the n8n editor with the locally installed Google Chrome
 // (Playwright, channel "chrome", headless) and saves PNGs. Needs a running stack.
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright-core";
@@ -13,13 +14,28 @@ const WANTED = [
   ["digest-sent", "Scheduled digest: all pages read, digest mailed"],
 ];
 
+// Playwright does not expose the browser pid for a channel launch, so find the Chrome processes it
+// started by their throwaway profile folder and make sure none outlive the run.
+function playwrightChromePids() {
+  try {
+    const out = execFileSync("ps", ["-axo", "pid=,command="], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+    return out
+      .split("\n")
+      .filter((l) => l.includes("playwright_chromiumdev_profile"))
+      .map((l) => Number(l.trim().split(/\s+/)[0]))
+      .filter(Number.isInteger);
+  } catch {
+    return [];
+  }
+}
+
 export async function takeScreenshots(stack, { outDir = path.join(ROOT, "evidence", "screenshots") } = {}) {
   const manifest = JSON.parse(fs.readFileSync(path.join(SCRATCH, "evidence-manifest.json"), "utf8"));
   fs.mkdirSync(outDir, { recursive: true });
   const cookie = stack.client.cookie ?? (await stack.client.login(stack.secrets));
   const [cookieName, ...rest] = cookie.split(";")[0].split("=");
+  const before = new Set(playwrightChromePids());
   const browser = await chromium.launch({ channel: "chrome", headless: true });
-  const pid = browser.process()?.pid;
   const taken = [];
   try {
     const context = await browser.newContext({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1 });
@@ -38,7 +54,9 @@ export async function takeScreenshots(stack, { outDir = path.join(ROOT, "evidenc
     }
   } finally {
     await browser.close().catch(() => {});
-    if (pid) await killTree(pid, { graceMs: 1500 }).catch(() => {});
+    for (const pid of playwrightChromePids()) {
+      if (!before.has(pid)) await killTree(pid, { graceMs: 1500 }).catch(() => {});
+    }
   }
   console.log(`screenshots: ${taken.join(", ") || "none"}`);
   return taken;

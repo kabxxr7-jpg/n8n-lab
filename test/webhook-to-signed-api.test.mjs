@@ -158,8 +158,8 @@ describe("webhook to signed API: failures and bad input", () => {
     ["an event id with a slash", { event_id: "a/b", text: "refund", callback_url: CALLBACK }, "event_id must be"],
     ["empty text", { event_id: "ok1", text: "   ", callback_url: CALLBACK }, "text must be"],
     ["text over 2000 characters", { event_id: "ok2", text: "x".repeat(2001), callback_url: CALLBACK }, "text must be"],
-    ["a callback URL on another host", { event_id: "ok3", text: "refund", callback_url: "http://evil.test/cb" }, "callback_url must start with"],
-    ["a user-info trick in the callback URL", { event_id: "ok4", text: "refund", callback_url: "http://127.0.0.1:4704@evil.test/cb" }, "callback_url must start with"],
+    ["a callback URL on another host name (localhost, not 127.0.0.1)", { event_id: "ok3", text: "refund", callback_url: "http://localhost:4704/callback" }, "callback_url must start with"],
+    ["a user-info trick in the callback URL", { event_id: "ok4", text: "refund", callback_url: "http://127.0.0.1:4704@localhost:4704/callback" }, "callback_url must start with"],
     ["an https callback URL", { event_id: "ok5", text: "refund", callback_url: "https://127.0.0.1:4704/cb" }, "callback_url must start with"],
     ["no callback URL", { event_id: "ok6", text: "refund" }, "callback_url must start with"],
   ])("answers 400 for %s and calls nothing downstream", async (_label, body, fragment) => {
