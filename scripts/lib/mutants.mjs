@@ -227,8 +227,11 @@ export const MUTANTS = [
     id: "signed-body-differs-from-signed-bytes",
     workflow: "webhook-to-signed-api.json",
     tests: [T.signed],
-    description: "the body that is sent differs from the bytes that were signed",
-    apply: (wf) => param(wf, "Call signed API", "body", "$json.bodyString", "$json.bodyString + ' '"),
+    // A trailing space would not do: n8n trims it before sending (seen in the first mutation run, where
+    // that variant survived because the bytes on the wire were unchanged). A space after the first comma
+    // is still valid JSON but is no longer what was signed.
+    description: "the body that is sent differs from the bytes that were signed (a space after the first comma)",
+    apply: (wf) => param(wf, "Call signed API", "body", "$json.bodyString", "$json.bodyString.replace(',', ', ')"),
   },
   {
     id: "signed-swap-branch-outputs",
@@ -306,11 +309,24 @@ export const MUTANTS = [
     id: "retry-no-wait",
     workflow: "retry-and-error-handling.json",
     tests: [T.retry],
-    description: "no wait between tries",
+    // n8n 2.45.7 treats a stored 0 as "use the default" and still waits about 1000 ms (measured), so this
+    // mutant is only visible in the stored settings; retry-short-wait below changes the behaviour for real.
+    description: "wait between tries set to 0 (n8n falls back to its 1000 ms default; caught by the stored-settings check)",
     apply: (wf) => {
       const n = node(wf, "Call flaky API");
       if (n.waitBetweenTries !== 1000) throw new Error("mutant: waitBetweenTries was not 1000");
       n.waitBetweenTries = 0;
+    },
+  },
+  {
+    id: "retry-short-wait",
+    workflow: "retry-and-error-handling.json",
+    tests: [T.retry],
+    description: "wait between tries cut from 1000 ms to 100 ms",
+    apply: (wf) => {
+      const n = node(wf, "Call flaky API");
+      if (n.waitBetweenTries !== 1000) throw new Error("mutant: waitBetweenTries was not 1000");
+      n.waitBetweenTries = 100;
     },
   },
   {
@@ -345,7 +361,7 @@ export const MUTANTS = [
     description: "the Error Workflow link is removed from the workflow settings",
     apply: (wf) => {
       if (!wf.settings.errorWorkflow) throw new Error("mutant: no errorWorkflow set");
-      delete wf.settings.errorWorkflow;
+      wf.settings.errorWorkflow = ""; // omitting the key would leave the old link in place on an update
     },
   },
   {
@@ -440,7 +456,7 @@ export const MUTANTS = [
     description: "the Error Workflow link is removed from the digest workflow",
     apply: (wf) => {
       if (!wf.settings.errorWorkflow) throw new Error("mutant: no errorWorkflow set");
-      delete wf.settings.errorWorkflow;
+      wf.settings.errorWorkflow = ""; // omitting the key would leave the old link in place on an update
     },
   },
   {
